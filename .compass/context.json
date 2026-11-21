@@ -1,62 +1,39 @@
 {
-  "project_name": "document-explainer-pipeline",
+  "project_name": "doclens-document-explainer",
   "mode": "solo",
   "source_spec": "mini-project-05-document-explainer.md",
-  "deployment": {
-    "cloud_account_map": {
-      "demo": "705229834629"
-    },
-    "profile": "AWSAdministratorAccess-705229834629",
-    "region": "us-east-1",
-    "deploys_allowed": true,
-    "note": "user said do not deploy anything yet; confirm gate required before any deploy",
-    "adr": "ADR-008",
-    "naming": "all named AWS resources start with 'suman-'; stack name suman-doc-explainer",
-    "deployed": {
-      "stack": "suman-doc-explainer",
-      "api_url": "https://nyacaat3cl.execute-api.us-east-1.amazonaws.com",
-      "account": "705229834629",
-      "region": "us-east-1",
-      "at": "2026-11-20T18:22:00.083803+00:00",
-      "frontend_url": "https://d3oajmr7loj0c2.cloudfront.net"
-    },
-    "pending_change": "redeploy needed: restructure (Lambda code+handler paths), secrets guardrail, demo notice"
-  },
   "vision": {
     "problem": "People cannot understand dense legal documents or spot risky clauses",
     "target_users": "Everyday non-legal people",
     "success_metrics": [
       "one-command cdk deploy",
-      "sample lease -> plain-English breakdown on page and email",
-      "audit log per stage",
-      "not-legal-advice disclaimer"
+      "document -> plain-English breakdown with flagged risks on the page",
+      "audit log per agent",
+      "not-legal-advice disclaimer on every result"
     ],
     "business_model": "learning/portfolio, none"
   },
   "constraints": {
-    "budget": "low, unconfirmed",
-    "timeline": "1-2 days, demo Monday",
+    "timeline": "1-2 day build, demo to guide",
     "team_size": 1,
-    "non_negotiables": [
-      "AWS us-east-1",
-      "Step Functions",
-      "CDK",
-      "Bedrock converse, no API key in code",
-      "not-legal-advice disclaimer",
-      "local testing before deploy"
-    ],
+    "budget": "low",
+    "region": "us-east-1",
     "compliance": [],
     "compliance_review": "not_needed",
-    "data_residency": "us-east-1",
     "data_types": [
-      "sample documents only"
+      "fake sample documents only"
+    ],
+    "non_negotiables": [
+      "Step Functions",
+      "CDK (Python)",
+      "Bedrock converse, no API key in code",
+      "not-legal-advice disclaimer",
+      "local tests before deploy",
+      "no account ID or secrets in code (deploy.env, gitignored)"
     ]
   },
-  "exit_check": [
-    "EC-1..EC-9 in docs/decisions/00-project-brief.md"
-  ],
   "stakeholders": {
-    "driver": "suman manyam",
+    "driver": "owner",
     "approvers": [
       "mentor",
       "company reviewer"
@@ -67,118 +44,75 @@
     ]
   },
   "nfrs": {
-    "latency": "<2min typical",
+    "latency": "<2 min typical",
     "max_input_chars": 20000,
     "availability": "best effort",
     "retries": 3,
     "cost_ceiling_usd": 5,
     "scale": "single user"
   },
-  "stack_plan": {
-    "language": "python",
-    "frontend": "deferred; builder handles outside Compass",
-    "iac": "aws-cdk-python"
-  },
-  "scope_notes": {
-    "spec_is_suggestion": true,
-    "mvp": "paste -> step functions (3 lambdas) -> poll -> render on page",
-    "optional": [
-      "S3 file upload"
-    ],
-    "dropped": [
-      "SES email"
-    ],
-    "frontend": "out of Compass scope; backend exposes API contract"
-  },
   "risks": [
     {
       "id": "R1",
-      "description": "AWS setup blockers (Bedrock model access, IAM, bootstrap)",
-      "impact": "high",
-      "likelihood": "medium",
-      "mitigation": "enable Bedrock access first and test one converse() call; use CDK grants; confirm account with sts get-caller-identity",
-      "owner": "suman"
+      "description": "AWS setup blockers (Bedrock access, IAM, bootstrap)",
+      "status": "resolved"
     },
     {
       "id": "R2",
       "description": "AI misreads or invents clause content",
-      "impact": "high",
-      "likelihood": "medium",
-      "mitigation": "prompts restrict to document text; show original clause beside explanation; disclaimer; test on known sample lease",
-      "owner": "suman"
+      "status": "mitigated: validation, original text shown, disclaimer"
     },
     {
       "id": "R3",
       "description": "Not finishing in 1-2 days",
-      "impact": "high",
-      "likelihood": "medium",
-      "mitigation": "smallest working version first; local tests; deploy early; build Lambdas, then Step Functions, then API and page",
-      "owner": "suman"
+      "status": "resolved"
     },
     {
       "id": "R4",
-      "description": "CDK and Step Functions are new to the builder",
-      "impact": "medium",
-      "likelihood": "high",
-      "mitigation": "learn on small pieces; use cdk synth to check; start with a minimal state machine",
-      "owner": "suman"
+      "description": "CDK and Step Functions new to builder",
+      "status": "mitigated: code walkthrough"
+    },
+    {
+      "id": "R5",
+      "description": "Slow local DNS (15 s) breaks CDK credential lookup",
+      "status": "workaround: hotspot or 8.8.8.8"
     }
   ],
-  "skills": {
-    "familiar": [
-      "AWS",
-      "API Gateway",
-      "DynamoDB",
-      "S3"
+  "scope": {
+    "built": [
+      "paste/attach .txt",
+      "3-agent Step Functions pipeline",
+      "async submit + poll with real progress",
+      "result on page",
+      "S3 + CloudFront website",
+      "secrets redaction",
+      "demo notice"
     ],
-    "new": [
-      "CDK",
-      "Step Functions"
+    "dropped_by_choice": [
+      "SES email",
+      "S3 presigned upload for large files"
     ]
   },
-  "workflow": "test Lambdas locally first, then deploy",
-  "decision_backlog": [
-    "D1 language",
-    "D2 SF data passing",
-    "D3 API/polling",
-    "D4 DynamoDB",
-    "D5 prompts",
-    "D6 local testing",
-    "D7 frontend",
-    "D8 deploy gate"
-  ],
-  "build_buy": {
-    "language": "python3.12",
-    "iac": "aws-cdk-python",
-    "tests": "pytest",
-    "adr": "ADR-001"
-  },
-  "integration": {
-    "data_passing": "through state machine",
-    "state_keys": [
-      "job_id",
-      "text",
-      "clauses",
-      "risks",
-      "explanation"
-    ],
-    "adr": "ADR-002"
+  "decisions": {
+    "ADR-001": "Python 3.12 Lambdas + CDK (Python), pytest",
+    "ADR-002": "data passes through the state machine",
+    "ADR-003": "start Lambda behind HTTP API; POST /jobs, GET /jobs/{job_id}; polling",
+    "ADR-004": "two DynamoDB tables: jobs, audit_log",
+    "ADR-005": "one prompt.md per agent, JSON between agents, validated in code",
+    "ADR-006": "mocked tests + real runs on deployed stack",
+    "ADR-008": "account read from deploy.env; confirm account before every deploy",
+    "D7": "frontend built by owner (frontend/index.html)"
   },
   "api": {
-    "style": "http-api",
     "routes": [
       "POST /jobs",
       "GET /jobs/{job_id}"
     ],
-    "start": "lambda",
     "statuses": [
       "RUNNING",
       "SUCCEEDED",
       "FAILED"
     ],
-    "max_chars": 20000,
-    "cors": true,
-    "adr": "ADR-003",
     "status_fields": [
       "job_id",
       "status",
@@ -186,78 +120,99 @@
       "result",
       "error"
     ],
-    "frontend": "frontend/index.html matches this contract; adaptResult() maps clause fields"
+    "cors": true,
+    "throttle": "2 req/s, burst 5"
   },
   "data": {
     "tables": {
-      "jobs": {
+      "suman-jobs": {
         "pk": "job_id"
       },
-      "audit_log": {
+      "suman-audit-log": {
         "pk": "job_id",
         "sk": "stage"
       }
     },
     "billing": "on-demand",
-    "removal": "destroy",
-    "adr": "ADR-004",
-    "jobs_attrs": [
-      "job_id",
-      "status",
-      "created_at",
-      "result_json",
-      "error"
-    ]
+    "removal": "destroy"
   },
-  "boundaries": {
+  "agents": {
+    "pattern": "sequential pipeline",
+    "model": "us.anthropic.claude-sonnet-4-6",
     "stages": [
-      "clause-extractor",
-      "risk-flagger",
-      "plain-english-rewriter"
+      "clause_extractor",
+      "risk_flagger",
+      "plain_english_rewriter"
     ],
-    "format": "json",
     "risk_levels": [
       "low",
       "medium",
       "high"
     ],
-    "adr": "ADR-005"
-  },
-  "testing": {
-    "unit": "pytest with mocked bedrock and dynamodb",
-    "real_check": "manual script with real bedrock",
-    "infra": "cdk synth",
-    "adr": "ADR-006"
+    "guardrails": [
+      "length cap",
+      "anti-invention check",
+      "exact clause coverage",
+      "fixed label menus",
+      "prompt-injection rule",
+      "code-fence stripping",
+      "secret redaction",
+      "disclaimer from code"
+    ]
   },
   "layout": {
-    "backend_src": "backend/src/{agents,api,shared}",
+    "lambda_code": "backend/src/{agents,api,shared}",
     "agent_prompts": "backend/src/agents/<agent>/prompt.md",
-    "infra": "backend/infra/{stack,storage,agents,orchestrator,api,website,settings}.py",
-    "tests": "backend/tests/{agents,api,shared,infra}",
+    "infra": "backend/infra/{stack,settings,storage,agents,orchestrator,api,website}.py",
+    "tests": "backend/tests/{agents,api,shared,infra} (76 tests)",
+    "frontend": "frontend/index.html",
     "test_docs": "test_docs/{input,result}",
-    "deploy_settings": "backend/deploy.env (gitignored)"
+    "docs": "docs/{decisions,architecture.html,audit-log-sample.json}",
+    "deploy_settings": "backend/deploy.env (gitignored); template deploy.env.example"
   },
-  "build_progress": {
+  "deployment": {
+    "cloud_account_map": {
+      "demo": "see APPROVED_ACCOUNT in backend/deploy.env"
+    },
+    "credentials": "AWS_PROFILE in backend/deploy.env",
+    "region": "us-east-1",
+    "stack": "suman-doc-explainer",
+    "naming": "all named resources start with 'suman-'",
+    "outputs": [
+      "ApiUrl",
+      "FrontendUrl"
+    ],
+    "gate": "before any deploy: source deploy.env, sts get-caller-identity must equal APPROVED_ACCOUNT, owner confirms",
+    "live_version": "first layout (before restructure); real lease runs SUCCEEDED",
+    "pending_redeploy": [
+      "restructure (Lambda code + handler paths)",
+      "secrets guardrail",
+      "demo notice"
+    ]
+  },
+  "repo": {
+    "host": "GitHub (private recommended)",
+    "excluded": [
+      "backend/deploy.env",
+      ".venv",
+      "cdk.out"
+    ]
+  },
+  "submission": {
     "done": [
-      "clause_extractor",
-      "risk_flagger",
-      "plain_english_rewriter",
-      "start_job",
-      "get_status",
-      "cdk_stack",
-      "prompt_improvements",
-      "deployed",
-      "website_s3_cloudfront (deployed)",
-      "secrets_guardrail (code, not deployed)",
-      "demo_notice (code, not deployed)"
+      "3 agent Lambdas with own prompts",
+      "Step Functions Retry/Catch",
+      "cdk deploy whole stack",
+      "Bedrock converse, no key in code",
+      "submit -> poll -> render",
+      "README with diagram + deploy steps",
+      "audit log from real run",
+      "code on GitHub"
     ],
     "todo": [
-      "real-bedrock script",
-      "README diagram",
-      "enable Bedrock model access (not done)",
-      "deploy only on owner approval"
-    ],
-    "tests": 76,
-    "note": "backend/samples removed by owner; tests self-contained; manual docs in test_docs/ (ans_ files separate)"
+      "redeploy pending changes",
+      "screenshot of rendered breakdown",
+      "cdk destroy after demo"
+    ]
   }
 }
