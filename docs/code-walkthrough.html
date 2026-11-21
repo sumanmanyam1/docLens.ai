@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Walkthrough: Document-Explainer</title>
+<style>
+  :root { --bg:#fff; --ink:#111; --muted:#666; --line:#d4d4d4; --box:#f6f6f6; --code:#f3f3f3;
+          --kid:#fff8e1; --kid-line:#e0a800; --pro:#eef3ff; --pro-line:#3b5bdb; --ok:#eaf7ee; --ok-line:#2b8a3e;
+          --aws:#fff3e0; --aws-line:#e08a00; --ai:#f6eeff; --ai-line:#7048e8; --bad:#fdecea; --bad-line:#c92a2a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f0f0f; --ink:#eee; --muted:#9a9a9a; --line:#333; --box:#1a1a1a; --code:#181818;
+            --kid:#2a2308; --kid-line:#d9a520; --pro:#14193a; --pro-line:#7c93f5; --ok:#122318; --ok-line:#5fc77a;
+            --aws:#2a2010; --aws-line:#e0a030; --ai:#201734; --ai-line:#a58bf5; --bad:#2a1412; --bad-line:#ff8a80; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.7 system-ui,"Segoe UI",Roboto,Arial,sans-serif; }
+  header { padding:40px 20px 8px; max-width:980px; margin:0 auto; }
+  header h1 { margin:0 0 6px; font-size:2rem; letter-spacing:-.02em; }
+  header p { margin:0; color:var(--muted); }
+  nav { max-width:980px; margin:14px auto 0; padding:0 20px; display:flex; flex-wrap:wrap; gap:8px; }
+  nav a { font-size:.85rem; color:var(--ink); text-decoration:none; border:1px solid var(--line); border-radius:99px; padding:3px 12px; }
+  nav a:hover { background:var(--box); }
+  main { max-width:980px; margin:0 auto; padding:8px 20px 80px; }
+  section { margin-top:44px; }
+  h2 { font-size:1.45rem; margin:0 0 6px; padding-top:8px; border-top:2px solid var(--ink); }
+  h3 { font-size:1.1rem; margin:26px 0 6px; }
+  p { margin:8px 0; }
+  code { background:var(--code); border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:.9em; }
+  pre { background:var(--code); border:1px solid var(--line); border-radius:8px; padding:14px 16px; overflow-x:auto; margin:10px 0; line-height:1.5; }
+  pre code { background:none; border:0; padding:0; font-size:.85rem; }
+  .file { font:600 .8rem ui-monospace,Menlo,Consolas,monospace; color:var(--muted); margin-top:16px; }
+  .kid, .pro, .tip, .warn { border-left:4px solid; border-radius:6px; padding:10px 14px; margin:12px 0; }
+  .kid { background:var(--kid); border-color:var(--kid-line); }
+  .pro { background:var(--pro); border-color:var(--pro-line); }
+  .tip { background:var(--ok); border-color:var(--ok-line); }
+  .warn { background:var(--bad); border-color:var(--bad-line); }
+  .kid b:first-child, .pro b:first-child, .tip b:first-child, .warn b:first-child { display:block; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; margin-bottom:2px; }
+  table { width:100%; border-collapse:collapse; margin:10px 0; }
+  th, td { text-align:left; vertical-align:top; border-bottom:1px solid var(--line); padding:7px 10px; font-size:.93rem; }
+  th { background:var(--box); }
+  td:first-child { white-space:nowrap; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.85rem; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:12px; margin:12px 0; }
+  .card { border:1px solid var(--line); background:var(--box); border-radius:8px; padding:12px 14px; }
+  .card h4 { margin:0 0 4px; font-size:1rem; }
+  .card p { margin:4px 0; font-size:.93rem; }
+  svg { width:100%; height:auto; border:1px solid var(--line); border-radius:8px; margin:12px 0; background:var(--bg); }
+  svg text { fill:var(--ink); font:13px system-ui,"Segoe UI",Arial,sans-serif; }
+  svg .s { font-size:11px; fill:var(--muted); } svg .t { font-weight:600; }
+  .nb { fill:var(--box); stroke:var(--line); stroke-width:1.5; } .la { fill:var(--aws); stroke:var(--aws-line); stroke-width:1.5; }
+  .ai { fill:var(--ai); stroke:var(--ai-line); stroke-width:1.5; } .gr { fill:var(--ok); stroke:var(--ok-line); stroke-width:1.5; }
+  .rd { fill:var(--bad); stroke:var(--bad-line); stroke-width:1.5; } .bl { fill:var(--pro); stroke:var(--pro-line); stroke-width:1.5; }
+  .ar { stroke:var(--ink); stroke-width:1.6; fill:none; marker-end:url(#h); } .da { stroke:var(--muted); stroke-width:1.5; fill:none; stroke-dasharray:5 4; marker-end:url(#h); }
+  ol.steps { padding-left:22px; } ol.steps li { margin-bottom:6px; }
+  details { border:1px solid var(--line); border-radius:8px; padding:8px 14px; margin:8px 0; background:var(--box); }
+  summary { cursor:pointer; font-weight:600; }
+  .small { color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="color:var(--ink)"/></marker>
+</defs></svg>
+
+<header>
+  <h1>Code Walkthrough</h1>
+  <p>Document-Explainer Pipeline. Explained so a 10-year-old can follow it, and detailed enough to present like a pro.</p>
+</header>
+<nav>
+  <a href="#story">1. The story</a><a href="#words">2. Key words</a><a href="#shared">3. Shared tools</a>
+  <a href="#s1">4. Stage 1</a><a href="#s2">5. Stage 2</a><a href="#s3">6. Stage 3</a><a href="#grow">7. Data growth</a>
+  <a href="#api">8. Start &amp; status</a><a href="#cdk">9. CDK stack</a><a href="#tests">10. Tests</a>
+  <a href="#why">11. Why we chose</a><a href="#qa">12. Questions</a><a href="#demo">13. Demo script</a>
+</nav>
+
+<main>
+
+<!-- ===================================================== -->
+<section id="story">
+  <h2>1. The story: a document assembly line</h2>
+  <div class="kid"><b>Like I'm 10</b>
+    Imagine a lease is a giant, boring paper full of tricky grown-up words. We build a little factory with
+    three workers in a row. Worker 1 cuts the paper into pieces. Worker 2 puts a red, yellow, or green sticker on each piece.
+    Worker 3 writes what each piece means in easy words. At the end you get a neat pile you can actually understand.
+  </div>
+
+  <svg viewBox="0 0 960 190" role="img" aria-label="Assembly line with three workers">
+    <rect class="nb" x="10" y="60" width="130" height="70" rx="8"/><text class="t" x="75" y="92" text-anchor="middle">Big boring</text><text class="t" x="75" y="110" text-anchor="middle">document</text>
+    <rect class="la" x="200" y="50" width="170" height="90" rx="8"/><text class="t" x="285" y="82" text-anchor="middle">Worker 1</text><text x="285" y="100" text-anchor="middle">Cuts into clauses</text><text class="s" x="285" y="120" text-anchor="middle">clause-extractor</text>
+    <rect class="la" x="420" y="50" width="170" height="90" rx="8"/><text class="t" x="505" y="82" text-anchor="middle">Worker 2</text><text x="505" y="100" text-anchor="middle">Sticks risk stickers</text><text class="s" x="505" y="120" text-anchor="middle">risk-flagger</text>
+    <rect class="la" x="640" y="50" width="170" height="90" rx="8"/><text class="t" x="725" y="82" text-anchor="middle">Worker 3</text><text x="725" y="100" text-anchor="middle">Writes easy words</text><text class="s" x="725" y="120" text-anchor="middle">plain-english-rewriter</text>
+    <rect class="gr" x="860" y="60" width="90" height="70" rx="8"/><text class="t" x="905" y="92" text-anchor="middle">Easy</text><text class="t" x="905" y="110" text-anchor="middle">pile</text>
+    <path class="ar" d="M140,95 L200,95"/><path class="ar" d="M370,95 L420,95"/><path class="ar" d="M590,95 L640,95"/><path class="ar" d="M810,95 L860,95"/>
+    <text class="s" x="480" y="175" text-anchor="middle">The "foreman" who moves the paper between workers is AWS Step Functions.</text>
+  </svg>
+
+  <div class="pro"><b>Say it like a pro</b>
+    "It is a three-stage serverless pipeline orchestrated by AWS Step Functions. Each stage is a Python Lambda that calls
+    Claude through Amazon Bedrock. A web page submits a document, then polls for the result, because the work takes longer than API Gateway's 29-second limit."
+  </div>
+
+  <h3>What happens when someone clicks the button</h3>
+  <svg viewBox="0 0 960 330" role="img" aria-label="Request and polling">
+    <rect class="nb" x="20" y="20" width="120" height="40" rx="6"/><text class="t" x="80" y="45" text-anchor="middle">Web page</text>
+    <rect class="la" x="220" y="20" width="150" height="40" rx="6"/><text class="t" x="295" y="45" text-anchor="middle">start-job</text>
+    <rect class="bl" x="470" y="20" width="170" height="40" rx="6"/><text class="t" x="555" y="45" text-anchor="middle">Step Functions</text>
+    <rect class="gr" x="740" y="20" width="190" height="40" rx="6"/><text class="t" x="835" y="45" text-anchor="middle">DynamoDB (jobs)</text>
+    <path class="da" d="M80,60 L80,310"/><path class="da" d="M295,60 L295,310"/><path class="da" d="M555,60 L555,310"/><path class="da" d="M835,60 L835,310"/>
+    <path class="ar" d="M80,90 L295,90"/><text class="s" x="188" y="84" text-anchor="middle">1. send document</text>
+    <path class="ar" d="M295,120 L835,120"/><text class="s" x="565" y="114" text-anchor="middle">2. save job as RUNNING</text>
+    <path class="ar" d="M295,150 L555,150"/><text class="s" x="425" y="144" text-anchor="middle">3. start pipeline</text>
+    <path class="ar" d="M295,180 L80,180"/><text class="s" x="188" y="174" text-anchor="middle">4. here is your job_id</text>
+    <path class="ar" d="M555,215 L835,215"/><text class="s" x="695" y="209" text-anchor="middle">5. when done: save SUCCEEDED + result</text>
+    <path class="ar" d="M80,250 L835,250"/><text class="s" x="460" y="244" text-anchor="middle">6. page asks "done yet?" every 3 seconds (via status Lambda)</text>
+    <path class="ar" d="M835,285 L80,285"/><text class="s" x="460" y="279" text-anchor="middle">7. answer: status, finished stages, result</text>
+  </svg>
+</section>
+
+<!-- ===================================================== -->
+<section id="words">
+  <h2>2. Key words, in plain English</h2>
+  <div class="cards">
+    <div class="card"><h4>Lambda</h4><p><b>Kid:</b> a tiny worker that wakes up only when there is a job, then goes back to sleep.</p><p><b>Pro:</b> serverless function; we pay per run, no servers to manage.</p></div>
+    <div class="card"><h4>Step Functions</h4><p><b>Kid:</b> the foreman with a checklist. Do step 1, then 2, then 3. If someone trips, try again.</p><p><b>Pro:</b> managed workflow service; state machine with Retry and Catch.</p></div>
+    <div class="card"><h4>DynamoDB</h4><p><b>Kid:</b> a giant notebook with one line per job.</p><p><b>Pro:</b> serverless NoSQL key-value store. We use two tables.</p></div>
+    <div class="card"><h4>Bedrock</h4><p><b>Kid:</b> the door to the smart AI helper (Claude).</p><p><b>Pro:</b> AWS service that hosts foundation models. We call <code>converse()</code>.</p></div>
+    <div class="card"><h4>CDK</h4><p><b>Kid:</b> instead of building the factory with your hands, you write a recipe and AWS builds it.</p><p><b>Pro:</b> infrastructure as code; Python turns into a CloudFormation template.</p></div>
+    <div class="card"><h4>API Gateway</h4><p><b>Kid:</b> the front desk. It takes requests and sends them to the right worker.</p><p><b>Pro:</b> HTTP API with two routes and rate limits.</p></div>
+    <div class="card"><h4>Retry / Catch</h4><p><b>Kid:</b> if a worker drops the paper, try again up to 3 times. Still failing? Write "failed" and stop.</p><p><b>Pro:</b> error-handling rules in the state machine.</p></div>
+    <div class="card"><h4>Audit log</h4><p><b>Kid:</b> a diary where each worker writes what it did.</p><p><b>Pro:</b> one row per stage per job; also powers the progress bar.</p></div>
+    <div class="card"><h4>Mock</h4><p><b>Kid:</b> a pretend AI for practice, so we do not need the real one.</p><p><b>Pro:</b> a test double; keeps tests free, fast and offline.</p></div>
+    <div class="card"><h4>JSON</h4><p><b>Kid:</b> a tidy way to write a list with labels.</p><p><b>Pro:</b> the structured format every stage returns and validates.</p></div>
+  </div>
+</section>
+
+<!-- ===================================================== -->
+<section id="shared">
+  <h2>3. Shared tools (the <code>src/shared/</code> folder)</h2>
+  <p>Small files every worker uses, so nothing is copied five times.</p>
+
+  <h3>config.py: the settings sheet</h3>
+  <div class="file">backend/src/shared/config.py</div>
+<pre><code>MAX_CHARS = 20_000
+MODEL_ID = os.environ.get("MODEL_ID", "us.anthropic.claude-sonnet-4-6")
+REGION = os.environ.get("AWS_REGION", "us-east-1")
+JOBS_TABLE = os.environ.get("JOBS_TABLE", "jobs")
+AUDIT_TABLE = os.environ.get("AUDIT_TABLE", "audit_log")
+DISCLAIMER = "This is a plain-language explanation, not legal advice."</code></pre>
+  <table>
+    <tr><th>Line</th><th>What it means</th></tr>
+    <tr><td>MAX_CHARS</td><td>The longest document we accept: 20,000 characters (about 3 to 8 pages). The underscore is just for readability.</td></tr>
+    <tr><td>os.environ.get(...)</td><td>"Read this setting from the environment. If it is missing, use the default after the comma." CDK fills these in on AWS, so the code never hard-codes names.</td></tr>
+    <tr><td>DISCLAIMER</td><td>The legal sentence added to every result. It lives in code so the AI can never change it.</td></tr>
+  </table>
+  <div class="kid"><b>Like I'm 10</b> It is the sticky note on the fridge: the rules everyone in the house follows.</div>
+
+  <h3>llm.py: asking the AI</h3>
+  <div class="file">backend/src/shared/llm.py</div>
+<pre><code>def call_model(system_prompt: str, user_text: str) -&gt; dict:
+    client = boto3.client("bedrock-runtime", region_name=REGION)
+    response = client.converse(
+        modelId=MODEL_ID,
+        system=[{"text": system_prompt}],
+        messages=[{"role": "user", "content": [{"text": user_text}]}],
+        inferenceConfig={"maxTokens": 4000, "temperature": 0},
+    )
+    reply_text = response["output"]["message"]["content"][0]["text"]
+    return json.loads(reply_text)</code></pre>
+  <table>
+    <tr><th>Part</th><th>What it means</th></tr>
+    <tr><td>system_prompt</td><td>The rules we give the AI ("use only this text, do not invent").</td></tr>
+    <tr><td>user_text</td><td>The material to work on (the document or the clauses).</td></tr>
+    <tr><td>client.converse(...)</td><td>The real call to Claude. No password or API key in our code. AWS gives the Lambda a role, and the role grants access.</td></tr>
+    <tr><td>temperature: 0</td><td>"Be as steady as possible." Same input should give almost the same answer.</td></tr>
+    <tr><td>json.loads(...)</td><td>Turns the AI's reply text into a Python dictionary. If the reply is not valid JSON, this raises an error, and the stage fails and retries.</td></tr>
+  </table>
+  <div class="pro"><b>Say it like a pro</b> "All three stages share one thin wrapper over Bedrock's converse API. In tests we replace it with a fake, so tests are free and need no AWS login."</div>
+
+  <h3>memory.py: the diary (audit log)</h3>
+  <div class="file">backend/src/shared/memory.py</div>
+<pre><code>def write_audit(job_id: str, stage: str, summary: dict) -&gt; None:
+    table = boto3.resource("dynamodb", region_name=REGION).Table(AUDIT_TABLE)
+    table.put_item(Item={
+        "job_id": job_id,
+        "stage": stage,
+        "timestamp": int(time.time()),
+        **summary,
+    })</code></pre>
+  <p>It saves one row: which job, which stage, when, and a short summary. <code>**summary</code> means "also add every item from the summary dictionary".
+  The table's key is <code>job_id</code> plus <code>stage</code>, so a retry overwrites the same row instead of adding a duplicate.</p>
+</section>
+
+<!-- ===================================================== -->
+<section id="s1">
+  <h2>4. Stage 1: the clause extractor</h2>
+  <div class="kid"><b>Like I'm 10</b> Worker 1 takes scissors and cuts the long paper into numbered strips. It must not change a single word, and it must not make up new strips.</div>
+  <div class="file">backend/src/agents/clause_extractor/prompt.md + handler.py</div>
+
+<p>The instructions live in their own file, <code>prompt.md</code>. The handler just reads it: <code>SYSTEM_PROMPT = (Path(__file__).parent / "prompt.md").read_text()</code>. So you can read or change an agent's instructions without touching code.</p>
+<pre><code>You split legal documents into clauses.
+
+Rules:
+- Use ONLY the text you are given. Do not add, guess, or invent anything.
+- Copy each clause's wording exactly. Do not rewrite or summarise it.
+- Number the clauses 1, 2, 3, ... in the order they appear.
+...
+- Reply with valid JSON only, in this shape:
+  {"clauses": [{"clause_id": 1, "original_text": "..."}]}</code></pre>
+  <p>This is the instruction card we hand the AI. It is strict on purpose: "only this text", "copy exactly", and a fixed JSON shape so the next worker can read the answer.</p>
+
+<pre><code>def validate_clauses(reply, document_text):
+    clauses = reply.get("clauses") if isinstance(reply, dict) else None
+    if not isinstance(clauses, list) or not clauses:
+        raise ValueError("reply must contain a non-empty 'clauses' list")
+
+    document = _squash(document_text)
+    for clause in clauses:
+        if "clause_id" not in clause or "original_text" not in clause:
+            raise ValueError("each clause needs 'clause_id' and 'original_text'")
+        if _squash(clause["original_text"]) not in document:
+            raise ValueError(f"clause {clause['clause_id']} is not found in the document")
+    return clauses</code></pre>
+  <table>
+    <tr><th>Part</th><th>What it means</th></tr>
+    <tr><td>reply.get("clauses")</td><td>Take the "clauses" list out of the AI's answer.</td></tr>
+    <tr><td>not clauses</td><td>An empty list is not acceptable. Raise an error.</td></tr>
+    <tr><td>"clause_id" not in clause</td><td>Every piece needs a number and its text.</td></tr>
+    <tr><td>_squash(...) not in document</td><td><b>The anti-invention check.</b> Every clause the AI returns must really exist in the original document (spaces ignored). If the AI made one up, we reject it.</td></tr>
+    <tr><td>raise ValueError</td><td>"Stop. This stage failed." Step Functions sees the failure and retries.</td></tr>
+  </table>
+
+<pre><code>def handler(event, context):
+    job_id = event["job_id"]
+    text = event["text"]
+
+    reply = call_model(SYSTEM_PROMPT, text)         # 1. ask the AI
+    clauses = validate_clauses(reply, text)         # 2. check its answer
+
+    write_audit(job_id, STAGE_NAME, {               # 3. record what we did
+        "status": "ok",
+        "clause_count": len(clauses),
+    })
+    return {**event, "clauses": clauses}            # 4. pass the result on</code></pre>
+  <ol class="steps">
+    <li><code>handler(event, context)</code> is the front door. AWS calls it. <code>event</code> is the input, here <code>{"job_id": ..., "text": ...}</code>.</li>
+    <li>Ask the AI. 2. Check the answer. 3. Write a diary line. 4. Return the same data plus the new <code>clauses</code>.</li>
+    <li><code>{**event, "clauses": clauses}</code> means "copy everything from event, and add clauses". The next stage receives it.</li>
+    <li>The audit row is written <b>after</b> validation, so a failed check never logs a success.</li>
+  </ol>
+  <div class="pro"><b>Say it like a pro</b> "Stage 1 is a thin orchestration function: call the model, validate the output against the source document to guard against hallucinated clauses, write an audit record, and return the enriched state."</div>
+</section>
+
+<!-- ===================================================== -->
+<section id="s2">
+  <h2>5. Stage 2: the risk flagger</h2>
+  <div class="kid"><b>Like I'm 10</b> Worker 2 reads each strip and puts a sticker on it: green (fine), yellow (look closer), or red (danger!). It also writes why in one short sentence.</div>
+  <div class="file">backend/src/agents/risk_flagger/handler.py</div>
+
+<pre><code>RISK_LEVELS = ["low", "medium", "high"]
+CATEGORIES = ["auto-renewal", "hidden fees", "cancellation", "liability", "other"]</code></pre>
+  <p>The only allowed answers. The AI cannot invent a new level like "scary". This is a fixed menu.</p>
+
+<pre><code>expected_ids = [c["clause_id"] for c in clauses]
+got_ids = [f.get("clause_id") for f in flags if isinstance(f, dict)]
+if sorted(got_ids, key=str) != sorted(expected_ids, key=str):
+    raise ValueError("reply must cover exactly the clauses we sent")
+
+for flag in flags:
+    if flag.get("risk_level") not in RISK_LEVELS: raise ValueError(...)
+    if flag.get("category") not in CATEGORIES:    raise ValueError(...)
+    needs_reason = flag["risk_level"] in ("medium", "high")
+    if needs_reason and not str(flag.get("reason", "")).strip():
+        raise ValueError(...)</code></pre>
+  <table>
+    <tr><th>Check</th><th>Why</th></tr>
+    <tr><td>Same ids as we sent</td><td>The AI may not skip a clause or add an extra one. We compare the two lists of numbers.</td></tr>
+    <tr><td>Level on the menu</td><td>Only low, medium, high.</td></tr>
+    <tr><td>Category on the menu</td><td>Only the five categories.</td></tr>
+    <tr><td>Reason for medium and high</td><td>A warning without a reason is useless.</td></tr>
+  </table>
+
+<pre><code>flagged = []
+for clause in clauses:
+    flag = flags[clause["clause_id"]]
+    flagged.append({
+        **clause,
+        "risk_level": flag["risk_level"],
+        "category": flag["category"],
+        "reason": flag.get("reason", ""),
+    })</code></pre>
+  <div class="tip"><b>Smart design choice</b> We copy the sticker onto <b>our own</b> clause from stage 1. The AI never sends the clause text back, so it cannot quietly change the wording. A test proves it.</div>
+  <p>The audit row stores how many were high, medium and low, which is a handy number to show your guide.</p>
+</section>
+
+<!-- ===================================================== -->
+<section id="s3">
+  <h2>6. Stage 3: the plain-English rewriter</h2>
+  <div class="kid"><b>Like I'm 10</b> Worker 3 explains each strip like a friendly teacher: short sentences, no hard words, same numbers and dates. Then we staple the "this is not legal advice" note on the front ourselves.</div>
+  <div class="file">backend/src/agents/plain_english_rewriter/handler.py</div>
+
+<pre><code>finished = [{**c, "plain_english": rewrites[c["clause_id"]]} for c in clauses]
+
+write_audit(job_id, STAGE_NAME, {"status": "ok", "clause_count": len(finished)})
+
+result = {"disclaimer": DISCLAIMER, "clauses": finished}
+return {**event, "clauses": finished, "result": result}</code></pre>
+  <table>
+    <tr><th>Line</th><th>What it means</th></tr>
+    <tr><td>[{**c, "plain_english": ...} for c in clauses]</td><td>A list comprehension: for every clause, copy it and add its plain-English text. One line instead of a loop.</td></tr>
+    <tr><td>"disclaimer": DISCLAIMER</td><td>The disclaimer comes from <b>our config</b>, not from the AI. A test checks that even if the AI sends its own, we ignore it.</td></tr>
+    <tr><td>"result"</td><td>The finished package the web page will show. The final step in Step Functions saves it into DynamoDB.</td></tr>
+  </table>
+  <div class="warn"><b>Honest limit (risk R2)</b> Code cannot prove an explanation is true to its clause. We reduce the risk with a strict prompt, showing the original wording next to every explanation on the page, and the disclaimer. Say this openly to your guide. It shows you understand the limits.</div>
+</section>
+
+<!-- ===================================================== -->
+<section id="grow">
+  <h2>7. One clause growing through the line</h2>
+  <p>This is the best picture to explain how data moves. Each worker adds one thing and passes it on.</p>
+  <svg viewBox="0 0 960 300" role="img" aria-label="A clause growing through three stages">
+    <rect class="la" x="10" y="20" width="290" height="190" rx="8"/><text class="t" x="155" y="44" text-anchor="middle">After stage 1</text>
+    <text x="26" y="72">clause_id: 2</text><text x="26" y="94">original_text: "Automatic</text><text x="26" y="112">Renewal. Unless Tenant gives</text><text x="26" y="130">notice 90 days before..."</text>
+    <rect class="la" x="335" y="20" width="290" height="190" rx="8"/><text class="t" x="480" y="44" text-anchor="middle">After stage 2</text>
+    <text x="351" y="72">clause_id: 2</text><text x="351" y="94">original_text: (same)</text>
+    <text class="t" x="351" y="124">+ risk_level: high</text><text class="t" x="351" y="146">+ category: auto-renewal</text><text class="t" x="351" y="168">+ reason: "Renews for a year</text><text class="t" x="351" y="186">if you miss the notice."</text>
+    <rect class="gr" x="660" y="20" width="290" height="190" rx="8"/><text class="t" x="805" y="44" text-anchor="middle">After stage 3</text>
+    <text x="676" y="72">clause_id, original_text,</text><text x="676" y="92">risk_level, category,</text><text x="676" y="112">reason: (all the same)</text>
+    <text class="t" x="676" y="146">+ plain_english: "The lease</text><text class="t" x="676" y="164">renews by itself unless you</text><text class="t" x="676" y="182">tell the landlord 90 days</text><text class="t" x="676" y="200">before it ends."</text>
+    <path class="ar" d="M300,115 L335,115"/><path class="ar" d="M625,115 L660,115"/>
+    <text class="s" x="480" y="245" text-anchor="middle">Nothing is ever overwritten. Each stage only adds new labels.</text>
+    <text class="s" x="480" y="265" text-anchor="middle">That is why the web page can show the original wording beside the simple explanation.</text>
+  </svg>
+</section>
+
+<!-- ===================================================== -->
+<section id="api">
+  <h2>8. The front desk: start-job and get-status</h2>
+
+  <h3>start_job: take the document, start the line</h3>
+  <div class="kid"><b>Like I'm 10</b> The receptionist checks the paper is not empty and not too long, writes it in the notebook as "working on it", rings the foreman, and hands you a ticket number.</div>
+  <div class="file">backend/src/api/start_job/handler.py</div>
+<pre><code>if not text:
+    return _response(400, {"error": "text is required"})
+if len(text) &gt; MAX_CHARS:
+    return _response(400, {"error": f"text exceeds {MAX_CHARS} characters"})
+
+job_id = uuid.uuid4().hex
+table.put_item(Item={"job_id": job_id, "status": "RUNNING", "created_at": int(time.time())})
+
+try:
+    _start_pipeline(job_id, text)
+except Exception:
+    table.update_item(... "FAILED" ...)
+    return _response(500, {"error": "could not start the analysis"})
+
+return _response(202, {"job_id": job_id})</code></pre>
+  <table>
+    <tr><th>Part</th><th>What it means</th></tr>
+    <tr><td>400</td><td>"Your mistake": empty, too long, or bad JSON. (We use the standard HTTP codes.)</td></tr>
+    <tr><td>uuid4().hex</td><td>A random, unique ticket number.</td></tr>
+    <tr><td>status RUNNING</td><td>Saved <b>before</b> starting, so the page can ask about the job right away.</td></tr>
+    <tr><td>try / except</td><td>If starting the pipeline fails, mark the job FAILED. Otherwise the page would wait forever.</td></tr>
+    <tr><td>202</td><td>"Accepted, working on it." Not 200, because the work is not finished yet.</td></tr>
+  </table>
+
+  <h3>get_status: "is it done yet?"</h3>
+  <div class="file">backend/src/api/get_status/handler.py</div>
+<pre><code>job = table.get_item(Key={"job_id": job_id}).get("Item")
+if not job:
+    return _response(404, {"error": "job not found"})
+
+if status == "SUCCEEDED":
+    reply["completed_stages"] = TOTAL_STAGES
+    reply["result"] = json.loads(job["result_json"])
+else:
+    reply["completed_stages"] = _count_finished_stages(job_id)
+    if status == "FAILED":
+        reply["error"] = job.get("error", "The analysis failed.")</code></pre>
+  <ul>
+    <li><b>404</b>: no such ticket number.</li>
+    <li><b>completed_stages</b>: counts the diary rows for this job. Two rows means two workers finished, so the page ticks off two steps. That is <b>real progress</b>, not a fake timer.</li>
+    <li><b>result_json</b>: the finished result is saved as text and turned back into data here.</li>
+  </ul>
+  <div class="pro"><b>Say it like a pro</b> "The API is asynchronous: POST returns 202 with a job id, and the client polls a status endpoint. Progress is derived from the audit table, so there is no extra state to keep in sync."</div>
+</section>
+
+<!-- ===================================================== -->
+<section id="cdk">
+  <h2>9. The recipe: the CDK stack</h2>
+  <div class="kid"><b>Like I'm 10</b> Instead of building the factory by hand, we write one recipe: "two notebooks, five workers, one foreman, one front desk". AWS reads the recipe and builds it. When we are done, one command tears it all down.</div>
+  <div class="file">backend/infra/: stack.py joins the parts; storage.py, agents.py, orchestrator.py, api.py, website.py build one part each</div>
+
+  <table>
+    <tr><th>File</th><th>What it builds</th></tr>
+    <tr><td>storage.py</td><td>Two DynamoDB tables, <code>suman-jobs</code> and <code>suman-audit-log</code>. Pay-per-use, and <code>DESTROY</code> means <code>cdk destroy</code> deletes them.</td></tr>
+    <tr><td>agents.py</td><td>Five Python 3.12 Lambdas. Gives the three stages permission for Bedrock (one model only) and the tables they need. Nothing more.</td></tr>
+    <tr><td>orchestrator.py</td><td>The foreman: extract, flag, rewrite, save. With Retry and Catch.</td></tr>
+    <tr><td>api.py</td><td>The front desk: <code>POST /jobs</code> and <code>GET /jobs/{job_id}</code>, with CORS and rate limits.</td></tr>
+    <tr><td>website.py</td><td>The web page: a private S3 bucket behind CloudFront, uploaded on every deploy.</td></tr>
+  </table>
+
+<pre><code>step = tasks.LambdaInvoke(stack, name, lambda_function=fn, payload_response_only=True,
+                          retry_on_service_exceptions=False)
+step.add_retry(errors=["States.ALL"], max_attempts=3,
+               interval=cdk.Duration.seconds(2), backoff_rate=2.0)
+
+...
+for step in (extract, flag, rewrite):
+    step.add_catch(save_failure, errors=["States.ALL"], result_path="$.error_info")
+
+definition = extract.next(flag).next(rewrite).next(save_success).next(sfn.Succeed(stack, "Job done"))</code></pre>
+  <table>
+    <tr><th>Line</th><th>What it means</th></tr>
+    <tr><td>payload_response_only=True</td><td>Hand the Lambda's output straight to the next step, with no extra wrapping.</td></tr>
+    <tr><td>add_retry(... max_attempts=3, backoff_rate=2.0)</td><td>On any failure, wait 2 seconds and try again, then 4, then 8. Up to 3 retries.</td></tr>
+    <tr><td>add_catch(save_failure)</td><td>If it still fails, go to "Save failure" and record FAILED with a friendly message.</td></tr>
+    <tr><td>extract.next(flag).next(rewrite)...</td><td>The order of the line. Read it left to right like a sentence.</td></tr>
+  </table>
+
+  <svg viewBox="0 0 960 250" role="img" aria-label="State machine with retry and catch">
+    <rect class="la" x="20" y="40" width="150" height="50" rx="8"/><text class="t" x="95" y="70" text-anchor="middle">Extract</text>
+    <rect class="la" x="230" y="40" width="150" height="50" rx="8"/><text class="t" x="305" y="70" text-anchor="middle">Flag risks</text>
+    <rect class="la" x="440" y="40" width="150" height="50" rx="8"/><text class="t" x="515" y="70" text-anchor="middle">Rewrite</text>
+    <rect class="bl" x="650" y="40" width="130" height="50" rx="8"/><text class="t" x="715" y="70" text-anchor="middle">Save result</text>
+    <rect class="gr" x="840" y="40" width="100" height="50" rx="25"/><text class="t" x="890" y="70" text-anchor="middle">Done</text>
+    <path class="ar" d="M170,65 L230,65"/><path class="ar" d="M380,65 L440,65"/><path class="ar" d="M590,65 L650,65"/><path class="ar" d="M780,65 L840,65"/>
+    <path class="da" d="M95,40 C95,5 130,5 130,40"/><text class="s" x="112" y="14" text-anchor="middle">retry x3</text>
+    <path class="da" d="M305,40 C305,5 340,5 340,40"/><text class="s" x="322" y="14" text-anchor="middle">retry x3</text>
+    <path class="da" d="M515,40 C515,5 550,5 550,40"/><text class="s" x="532" y="14" text-anchor="middle">retry x3</text>
+    <rect class="rd" x="330" y="170" width="200" height="50" rx="8"/><text class="t" x="430" y="200" text-anchor="middle">Save failure (FAILED)</text>
+    <path class="da" d="M95,90 L95,195 L330,195"/><path class="da" d="M305,90 L305,170"/><path class="da" d="M515,90 L515,130 L450,130 L450,170"/>
+    <text class="s" x="640" y="190">If a stage still fails after 3 retries,</text><text class="s" x="640" y="208">we jump here and the page shows an error</text><text class="s" x="640" y="226">instead of waiting forever.</text>
+  </svg>
+
+  <h3>Safety choices in the recipe</h3>
+  <ul>
+    <li><b>Least privilege:</b> only the three stages may call Bedrock, and only that one model. A test checks the permission is not a wildcard.</li>
+    <li><b>Throttling:</b> 2 requests a second (burst 5), because the API has no login and every request can spend AI money.</li>
+    <li><b>Prefix:</b> every named resource starts with <code>suman-</code>, so it is easy to find in the company account.</li>
+    <li><b>Not deployed:</b> <code>python app.py</code> only writes a template on this machine. Nothing is created in AWS until someone runs <code>cdk deploy</code>, and that needs the account confirmation step.</li>
+  </ul>
+</section>
+
+<!-- ===================================================== -->
+<section id="tests">
+  <h2>10. The tests: how we know it works without AWS</h2>
+  <div class="kid"><b>Like I'm 10</b> Before opening the factory, we practise with a pretend AI that gives answers we choose. We check good answers pass and bad answers get stopped.</div>
+  <div class="file">backend/tests/agents/test_clause_extractor.py</div>
+<pre><code>def test_invented_clause_fails(monkeypatch, audit_rows):
+    fake_ai(monkeypatch, {"clauses": [
+        {"clause_id": 1, "original_text": "Tenant must pay a pet fee of $500."}]})
+    with pytest.raises(ValueError):
+        stage.handler({"job_id": "j1", "text": LEASE}, None)
+    assert audit_rows == []</code></pre>
+  <ul>
+    <li><code>fake_ai</code>: swaps the real AI call for a pretend reply.</li>
+    <li>The pretend AI invents a "pet fee" clause that is not in the lease.</li>
+    <li><code>pytest.raises(ValueError)</code>: we <b>expect</b> the stage to refuse it.</li>
+    <li><code>audit_rows == []</code>: and nothing is written as a success.</li>
+  </ul>
+  <table>
+    <tr><th>Test file</th><th>What it protects</th></tr>
+    <tr><td>test_clause_extractor</td><td>good reply, audit row, bad shapes, invented clause</td></tr>
+    <tr><td>test_risk_flagger</td><td>skipped or extra clause, bad level or category, missing reason, original text unchanged</td></tr>
+    <tr><td>test_plain_english_rewriter</td><td>missing or extra clause, empty text, disclaimer always from code</td></tr>
+    <tr><td>test_pipeline_chain</td><td>stage 1, 2 and 3 in a row on the sample lease</td></tr>
+    <tr><td>test_start_job / test_get_status</td><td>input checks, job saved, progress count, result, errors (fake DynamoDB)</td></tr>
+    <tr><td>test_stack</td><td>5 Lambdas, 2 tables, state machine, routes, throttling, scoped permission, <code>suman-</code> names</td></tr>
+  </table>
+  <p><b>76 tests pass</b>, all on this machine. Fake credentials are set so a test can never reach your real AWS account.</p>
+  <div class="tip"><b>Honest note</b> Mock tests check <i>our code</i>. They cannot show how good the real AI's answers are. That is why we also plan a small script that runs the sample lease through real Bedrock once.</div>
+</section>
+
+<!-- ===================================================== -->
+<section id="why">
+  <h2>11. Why we chose it this way</h2>
+  <table>
+    <tr><th>Decision</th><th>Choice</th><th>Why (one line)</th></tr>
+    <tr><td>ADR-001</td><td>Python for Lambdas and CDK; pytest</td><td>Readable, one language everywhere, simple tests.</td></tr>
+    <tr><td>ADR-002</td><td>Data passes through the state machine</td><td>Simple. The 20,000-character cap keeps it far below the 256 KB limit.</td></tr>
+    <tr><td>ADR-003</td><td>Start Lambda behind API Gateway; polling</td><td>Plain Python you can read and test, instead of hidden settings.</td></tr>
+    <tr><td>ADR-004</td><td>Two DynamoDB tables</td><td>One purpose each: status, and the step-by-step log.</td></tr>
+    <tr><td>ADR-005</td><td>Three prompts, JSON between stages</td><td>Fixed fields are reliable and testable.</td></tr>
+    <tr><td>ADR-006</td><td>Mocked tests plus one real-Bedrock check</td><td>Fast and free, plus one look at real quality.</td></tr>
+    <tr><td>ADR-008</td><td>Confirm the account before any deploy</td><td>Your machine has several accounts. Never deploy to the wrong one.</td></tr>
+  </table>
+  <p class="small">All the decision records are in <code>docs/decisions/adr/</code>.</p>
+</section>
+
+<!-- ===================================================== -->
+<section id="qa">
+  <h2>12. Questions your guide might ask</h2>
+  <details><summary>What if the AI makes things up?</summary>
+    <p>Three layers. The prompts say use only the given text. Stage 1 rejects any clause that is not really in the document, and stages 2 and 3 reject answers that skip or add clauses. The AI can never change the original wording, the risk labels, or the disclaimer, because our code owns them. The page also shows the original wording beside every explanation. We say openly that code cannot fully prove an explanation is accurate, so the disclaimer stays.</p></details>
+  <details><summary>What happens if a stage fails?</summary>
+    <p>Step Functions retries up to 3 times with growing waits (2, 4, 8 seconds). If it still fails, a catch rule saves the job as FAILED with a friendly message, and the page shows it. Nothing hangs.</p></details>
+  <details><summary>Why Step Functions and not Lambdas calling each other?</summary>
+    <p>It gives retries, error handling, and a visible step-by-step history for free. It is also easy to explain: one foreman, three workers.</p></details>
+  <details><summary>Why is it asynchronous?</summary>
+    <p>Three AI calls take longer than API Gateway's 29-second limit. So we return a job id immediately and the page polls.</p></details>
+  <details><summary>How do you track progress?</summary>
+    <p>Each stage writes one audit row. The status Lambda counts the rows for the job. Two rows means two stages finished.</p></details>
+  <details><summary>Is it secure?</summary>
+    <p>It is a demo with no login, so we use only fake documents. Still: no API keys in code (IAM roles), least-privilege permissions (one model only), throttling on the API, and encryption at rest by default. A real product would add authentication and a limit on who can call the API.</p></details>
+  <details><summary>What does it cost?</summary>
+    <p>Pennies at demo scale. Lambda, DynamoDB, Step Functions and API Gateway are pay-per-use, and the main cost is the Bedrock calls. <code>cdk destroy</code> removes everything.</p></details>
+  <details><summary>Why did you not use SES email?</summary>
+    <p>The spec suggested it, but the page already shows the result, and email setup (sandbox, verified addresses) adds risk for a short build. It is a clean extra to add later.</p></details>
+  <details><summary>What would you improve next?</summary>
+    <p>Add login, add a "what to check before signing" list per clause, support file upload through S3, compare results across prompt versions, and add alarms.</p></details>
+  <details><summary>Is it deployed?</summary>
+    <p>Yes. One <code>cdk deploy</code> stands up the whole stack, including the state machine and the website (S3 + CloudFront). It is tested locally with 76 tests, and real documents have been run through the deployed pipeline. <code>cdk destroy</code> removes everything.</p></details>
+</section>
+
+<!-- ===================================================== -->
+<section id="demo">
+  <h2>13. A 2-minute demo script</h2>
+  <ol class="steps">
+    <li><b>0:00 The problem (15 s).</b> "Leases and policies are hard to read, and people miss traps like auto-renewal and hidden fees."</li>
+    <li><b>0:15 The idea (20 s).</b> Open <code>docs/architecture.html</code>. "A page sends the document to an API. Step Functions runs three Lambdas: extract, flag, rewrite. Each one calls Claude through Bedrock."</li>
+    <li><b>0:35 The code (40 s).</b> Open stage 1. Show the prompt, then <code>validate_clauses</code>. "Every answer is checked before it moves on. The AI cannot invent a clause or change wording." Show the <code>_squash(...) not in document</code> line.</li>
+    <li><b>1:15 Reliability (20 s).</b> Show the retry and catch lines in <code>stack.py</code>. "Three retries, then it is saved as FAILED. Nothing hangs."</li>
+    <li><b>1:35 Proof (15 s).</b> Run <code>pytest</code>. "76 tests, all with a pretend AI, so it is free and offline."</li>
+    <li><b>1:50 Close (10 s).</b> "It is deployed with one cdk deploy, and one cdk destroy removes it all."</li>
+  </ol>
+  <div class="tip"><b>One sentence if you forget everything</b>
+    "The document goes through three AI workers in a row, a foreman retries anything that fails, every answer is checked before it moves on, and the page shows the result with the original wording next to a plain-English version."</div>
+</section>
+
+</main>
+</body>
+</html>

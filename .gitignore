@@ -1,0 +1,18 @@
+# --- never commit: account IDs, logins, personal settings ---
+backend/deploy.env
+.env
+*.env
+!*.env.example
+.compass/
+.aws/
+start Building*.txt
+
+# --- generated / local only ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/cdk.out/
+cdk.out/
+node_modules/
+.DS_Store

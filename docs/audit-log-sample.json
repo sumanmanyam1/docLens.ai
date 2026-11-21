@@ -1,0 +1,33 @@
+{
+  "description": "Audit log from one real run of the deployed pipeline (table suman-audit-log). Each agent writes one row per job. Document: test_docs/input/sample_lease.txt (fake).",
+  "job_id": "3f637b1f8b1d489587da1717f9200681",
+  "stages_recorded": 3,
+  "rows": [
+    {
+      "clause_count": 8,
+      "job_id": "3f637b1f8b1d489587da1717f9200681",
+      "timestamp": 1795230036,
+      "status": "ok",
+      "stage": "1#clause-extractor",
+      "time_utc": "2026-11-21 03:00:36"
+    },
+    {
+      "low": 2,
+      "medium": 4,
+      "status": "ok",
+      "timestamp": 1795230043,
+      "job_id": "3f637b1f8b1d489587da1717f9200681",
+      "high": 2,
+      "stage": "2#risk-flagger",
+      "time_utc": "2026-11-21 03:00:43"
+    },
+    {
+      "job_id": "3f637b1f8b1d489587da1717f9200681",
+      "clause_count": 8,
+      "status": "ok",
+      "timestamp": 1795230051,
+      "stage": "3#plain-english-rewriter",
+      "time_utc": "2026-11-21 03:00:51"
+    }
+  ]
+}

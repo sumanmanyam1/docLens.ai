@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plain-English Document Explainer</title>
+<style>
+  :root {
+    --bg:#ffffff; --surface:#ffffff; --ink:#111111; --muted:#6b6b6b; --line:#e5e5e5; --rule:#f3f3f3;
+    --brand:#111111; --brand-ink:#ffffff;
+    --high:#b3261e; --high-bg:#faf0ef; --med:#7a5c00; --med-bg:#f8f5ea;
+    --low:#555555; --low-bg:#f3f3f3; --ok:#555555; --ok-bg:#f3f3f3;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0f0f0f; --surface:#161616; --ink:#eeeeee; --muted:#999999; --line:#2a2a2a; --rule:#1e1e1e;
+      --brand:#eeeeee; --brand-ink:#111111;
+      --high:#ff8a80; --high-bg:#251413; --med:#e0c26a; --med-bg:#231f10;
+      --low:#aaaaaa; --low-bg:#1e1e1e; --ok:#aaaaaa; --ok-bg:#1e1e1e;
+    }
+  }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 var(--sans); }
+  h1,h2,h3 { font-family:var(--sans); font-weight:600; margin:0; }
+
+  /* ---- Header ---- */
+  .hero { padding:56px 20px 8px; }
+  .hero-inner { max-width:760px; margin:0 auto; }
+  .hero h1 { font-size:clamp(1.8rem,4.5vw,2.4rem); line-height:1.15; letter-spacing:-.02em; }
+  .hero p { color:var(--muted); font-size:1.05rem; max-width:52ch; margin:12px 0 0; }
+  .hero .demo-note { font-size:.9rem; max-width:none; background:var(--med-bg); color:var(--med); border-radius:8px; padding:8px 12px; }
+
+  /* ---- Layout ---- */
+  main { max-width:760px; margin:0 auto; padding:24px 20px 56px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:24px; margin-bottom:20px; }
+
+  /* ---- Form ---- */
+  #formCard { border:0; padding:0; background:transparent; }
+  label { display:block; font-weight:600; margin-bottom:10px; }
+  textarea { width:100%; min-height:240px; resize:vertical; font:1rem/1.6 var(--sans); color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  textarea:focus { border-color:var(--ink); outline:none; }
+  .hint { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:.88rem; margin:10px 0 18px; }
+  .over { color:var(--high); font-weight:600; }
+  input[type=file]::file-selector-button { font:500 .88rem var(--sans); background:var(--rule); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 12px; margin-right:10px; cursor:pointer; }
+  :focus-visible { outline:2px solid var(--ink); outline-offset:3px; }
+  .error { background:var(--high-bg); color:var(--high); border-radius:8px; padding:10px 14px; margin-top:14px; font-weight:500; }
+
+  /* ---- Buttons (simple, flat) ---- */
+  button { font:600 1rem var(--sans); color:var(--brand-ink); background:var(--brand); border:1px solid var(--brand); border-radius:8px; padding:12px 24px; cursor:pointer; }
+  button:hover:not(:disabled) { opacity:.85; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  button.ghost { background:transparent; color:var(--ink); border:1px solid var(--line); }
+
+  /* ---- Prompt-style input box ---- */
+  .prompt { border:1px solid var(--line); border-radius:14px; background:var(--surface); transition:border-color .15s; }
+  .prompt:focus-within { border-color:var(--ink); }
+  .prompt.drag { border-style:dashed; border-color:var(--ink); }
+  .prompt textarea { border:0; border-radius:14px 14px 0 0; min-height:70px; max-height:240px; resize:none; overflow-y:auto; background:transparent; padding:14px 16px; }
+  .prompt textarea:focus { border:0; outline:none; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; padding:12px 14px 0; }
+  .chip { display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line); background:var(--rule); border-radius:8px; padding:3px 6px 3px 10px; font-size:.85rem; }
+  .chip small { color:var(--muted); }
+  .chip button { background:transparent; border:0; color:var(--muted); padding:0 6px; font-size:1.1rem; line-height:1.4; border-radius:6px; }
+  .chip button:hover:not(:disabled) { opacity:1; color:var(--ink); }
+  .prompt-bar { display:flex; align-items:center; gap:10px; padding:8px 10px 10px 12px; }
+  .icon-btn { display:inline-flex; align-items:center; gap:6px; background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:7px 12px; font-size:.88rem; font-weight:500; }
+  .icon-btn:hover:not(:disabled) { opacity:1; color:var(--ink); border-color:var(--ink); }
+  .send { margin-left:auto; width:38px; height:38px; padding:0; border-radius:50%; display:grid; place-items:center; }
+
+  /* ---- Three-ring loader (your code) ---- */
+  .loader-stage { position:relative; height:140px; }
+  .loader {
+    position: absolute;
+    top: calc(50% - 32px);
+    left: calc(50% - 32px);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    perspective: 800px;
+  }
+  .inner {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+  .inner.one { left: 0%; top: 0%; animation: rotate-one 1s linear infinite; border-bottom: 3px solid var(--brand); }
+  .inner.two { right: 0%; top: 0%; animation: rotate-two 1s linear infinite; border-right: 3px solid var(--brand); }
+  .inner.three { right: 0%; bottom: 0%; animation: rotate-three 1s linear infinite; border-top: 3px solid var(--brand); }
+  @keyframes rotate-one {
+    0% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg); }
+    100% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); }
+  }
+  @keyframes rotate-two {
+    0% { transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg); }
+    100% { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); }
+  }
+  @keyframes rotate-three {
+    0% { transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg); }
+    100% { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); }
+  }
+
+  /* ---- Blurred loading screen + steps ---- */
+  .loading-overlay { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:20px; -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
+  .loading-inner { width:min(360px,100%); text-align:center; }
+  .loading-inner .steps { text-align:left; }
+  .steps { list-style:none; margin:16px 0 0; padding:0; display:grid; gap:8px; }
+  .steps li { display:flex; align-items:center; gap:12px; padding:10px 14px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--muted); }
+  .steps li.active { border-color:var(--ink); color:var(--ink); font-weight:600; }
+  .steps li.done { color:var(--muted); }
+  .dot { width:24px; height:24px; border-radius:50%; display:grid; place-items:center; border:1px solid currentColor; font-size:.8rem; flex:none; }
+
+  /* ---- Result ---- */
+  .disclaimer { border-left:3px solid var(--ink); padding:4px 0 4px 14px; color:var(--muted); font-size:.92rem; margin:14px 0 20px; }
+  .meter { display:flex; height:8px; border-radius:99px; overflow:hidden; background:var(--rule); margin-bottom:12px; }
+  .legend { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+  .high { --c:var(--high); --cb:var(--high-bg); } .medium { --c:var(--med); --cb:var(--med-bg); }
+  .low { --c:var(--low); --cb:var(--low-bg); } .none { --c:var(--ok); --cb:var(--ok-bg); }
+  .pill { background:var(--cb); color:var(--c); border-radius:99px; padding:2px 10px; font-size:.82rem; font-weight:600; white-space:nowrap; }
+  .meter .high { background:var(--high); } .meter .medium { background:#c9a227; } .meter .low { background:#a8a8a8; } .meter .none { background:#d4d4d4; }
+  .flags h2,.checks h2 { font-size:1.15rem; margin-bottom:14px; }
+  .list { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+  .list li { display:flex; gap:12px; align-items:flex-start; }
+  .bang { flex:none; width:22px; height:22px; border-radius:50%; border:1.5px solid var(--high); color:var(--high); font-weight:700; display:grid; place-items:center; font-size:.8rem; margin-top:2px; }
+  .list input[type=checkbox] { flex:none; width:20px; height:20px; margin-top:3px; accent-color:var(--ink); }
+  .list label { font-weight:400; margin:0; cursor:pointer; }
+  .list input:checked + label { text-decoration:line-through; color:var(--muted); }
+  .clause-title { font-size:1.15rem; margin:28px 0 14px; }
+  .clause { background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--c); border-radius:8px; padding:16px 18px; margin-bottom:12px; }
+  .clause.none, .clause.low { --c:#c4c4c4; }
+  .clause h3 { font-size:1rem; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .why { background:var(--cb); color:var(--c); border-radius:6px; padding:8px 12px; font-size:.9rem; margin-bottom:10px; }
+  .plain { margin:0 0 10px; }
+  details { color:var(--muted); font-size:.9rem; } summary { cursor:pointer; }
+
+  /* ---- Flip tiles ---- */
+  .ft { display:inline-block; border-radius:3px; transform-origin:50% 60%; animation:flipTile .65s var(--d,0s) backwards; }
+  @keyframes flipTile {
+    0% { transform:perspective(300px) rotateX(-95deg); background:var(--brand); color:var(--brand); }
+    50% { transform:perspective(300px) rotateX(0deg); background:var(--brand); color:var(--brand); }
+    100% { transform:perspective(300px) rotateX(0deg); }
+  }
+  @media (prefers-reduced-motion:reduce) { .ft { animation:none; } .inner { animation:none; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div>
+      <h1>DocLens</h1>
+    </div>
+    <!-- Demo notice (spec section 6): this page has no login and is for testing only -->
+    <p class="demo-note" role="note"><strong>Demo only.</strong> Do not upload real or personal documents. Results are a plain-language explanation, not legal advice.</p>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="formCard">
+    <label for="docText">Paste or attach your document</label>
+    <div class="prompt" id="prompt">
+      <div class="chips" id="chips" hidden></div>
+      <textarea id="docText" placeholder="Paste the text of your lease, policy or terms here, or drop a .txt file"></textarea>
+      <div class="prompt-bar">
+        <button type="button" class="icon-btn" id="attachBtn" title="Attach a .txt file">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>
+          Attach
+        </button>
+        <input type="file" id="docFile" accept=".txt,text/plain" hidden>
+        <button id="submitBtn" class="send" type="button" aria-label="Explain my document" title="Explain my document">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="formError" class="error" role="alert" hidden></div>
+  </section>
+
+  <section class="loading-overlay" id="statusCard" hidden aria-live="polite">
+    <div class="loading-inner">
+    <h2>Reading your document</h2>
+    <div class="loader-stage">
+      <div class="loader" aria-hidden="true">
+        <div class="inner one"></div>
+        <div class="inner two"></div>
+        <div class="inner three"></div>
+      </div>
+    </div>
+    <ul class="steps" id="steps"></ul>
+    </div>
+  </section>
+
+  <section id="resultSection" hidden></section>
+</main>
+
+<script>
+// ====== SETTINGS: change these after you deploy the backend ======
+const API_URL = "https://nyacaat3cl.execute-api.us-east-1.amazonaws.com";          // example: "https://abc123.execute-api.us-east-1.amazonaws.com"
+const MAX_CHARS = 20000;     // must match the length limit in your backend
+const POLL_EVERY_MS = 3000;  // ask "done yet?" every 3 seconds
+const MAX_POLLS = 100;       // stop after about 5 minutes
+// =================================================================
+
+const DEMO = !API_URL;
+const LEVEL_LABEL = { high: "High risk", medium: "Watch out", low: "Minor note", none: "No concern" };
+const STEPS = ["Splitting into clauses", "Flagging risks", "Rewriting in plain English"];
+const $ = (id) => document.getElementById(id);
+let pollTimer = null, flipClock = 0;
+
+// Small helper: make an element with a class and text (textContent keeps document text safe)
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+// ----- Talking to the backend -----
+async function submitJob(text) {
+  // Backend contract (ADR-003): POST /jobs with {text} -> {job_id}
+  const res = await fetch(API_URL + "/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "server said " + res.status);
+  if (!data.job_id) throw new Error("no job id returned");
+  return data.job_id;
+}
+async function getStatus(jobId) {
+  // GET /jobs/{job_id} -> {job_id, status: RUNNING | SUCCEEDED | FAILED, result?, error?}
+  const res = await fetch(API_URL + "/jobs/" + encodeURIComponent(jobId));
+  if (!res.ok) throw new Error("status " + res.status);
+  return res.json();
+}
+
+// Turn the backend's result (ADR-005) into the shape this page draws.
+// Backend clause: {clause_id, original_text, risk_level, category, reason, plain_english}
+function adaptResult(result) {
+  return {
+    disclaimer: result.disclaimer,
+    clauses: (result.clauses || []).map((c) => ({
+      title: "Clause " + c.clause_id,
+      original: c.original_text,
+      plain: c.plain_english,
+      risk: { level: c.risk_level, category: c.category, reason: c.reason }
+    }))
+  };
+}
+
+// ----- Demo data (only used when API_URL is empty) -----
+// It uses the same shape the real backend returns, so adaptResult() is tested too.
+function demoStatus(count) {
+  if (count < 4) return { status: "RUNNING", completed_stages: Math.min(count - 1, 2) };
+  return { status: "SUCCEEDED", result: {
+    disclaimer: "This is a plain-language explanation, not legal advice.",
+    clauses: [
+      { clause_id: 3, original_text: "Tenant shall pay rent of Rs. 15,000 on or before the 5th of each month.", plain_english: "You pay Rs. 15,000 every month, by the 5th.", risk_level: "low", category: "other", reason: "" },
+      { clause_id: 2, original_text: "This Agreement shall renew automatically for a further term of twelve months unless Tenant serves written notice sixty days prior to expiry.", plain_english: "If you do nothing, the agreement continues for another 12 months. To leave, you must tell the owner in writing at least 60 days before it ends.", risk_level: "high", category: "Auto-renewal", reason: "You can get locked in for another year if you miss the 60-day notice." },
+      { clause_id: 4, original_text: "A penalty of 5% per day shall apply on delayed payments.", plain_english: "If rent is late, you pay an extra 5% of the rent for every day it stays unpaid.", risk_level: "medium", category: "Hidden fee", reason: "5% per day adds up very fast." }
+    ] } };
+}
+
+// ----- Screens: show only one at a time -----
+function showScreen(name) {
+  $("formCard").hidden = name === "done";
+  $("statusCard").hidden = name !== "working";
+  $("resultSection").hidden = name !== "done";
+}
+
+// ----- Form -----
+
+$("docText").addEventListener("input", () => { autoGrow(); });
+
+let loadedText = "";
+
+// Make the text box grow as you type (up to a limit)
+function autoGrow() {
+  const t = $("docText");
+  t.style.height = "auto";
+  t.style.height = Math.min(t.scrollHeight, 240) + "px";
+}
+
+// Show the attached file as a small chip with an x to remove it
+function setChip(file) {
+  const chips = $("chips"); chips.replaceChildren();
+  if (!file) { chips.hidden = true; return; }
+  const chip = el("span", "chip", file.name + " ");
+  chip.appendChild(el("small", "", Math.max(1, Math.round(file.size / 1024)) + " KB"));
+  const x = el("button", "", "\u00d7"); x.type = "button"; x.setAttribute("aria-label", "Remove file " + file.name);
+  x.addEventListener("click", () => {
+    if ($("docText").value === loadedText) { $("docText").value = ""; autoGrow(); }
+    loadedText = ""; $("docFile").value = ""; setChip(null);
+  });
+  chip.appendChild(x); chips.appendChild(chip); chips.hidden = false;
+}
+
+function loadFile(file) {
+  if (!file) return;
+  if (!/\.txt$/i.test(file.name) && file.type !== "text/plain") return showError("Only plain .txt files can be attached for now. You can paste the text instead.");
+  $("formError").hidden = true;
+  const reader = new FileReader();
+  reader.onload = () => { loadedText = String(reader.result); $("docText").value = loadedText; autoGrow(); setChip(file); };
+  reader.onerror = () => showError("Could not read that file. Try a plain .txt file.");
+  reader.readAsText(file);
+}
+
+$("attachBtn").addEventListener("click", () => $("docFile").click());
+$("docFile").addEventListener("change", (e) => loadFile(e.target.files[0]));
+
+// Drag and drop a file onto the box
+const promptBox = $("prompt");
+promptBox.addEventListener("dragover", (e) => { e.preventDefault(); promptBox.classList.add("drag"); });
+promptBox.addEventListener("dragleave", () => promptBox.classList.remove("drag"));
+promptBox.addEventListener("drop", (e) => { e.preventDefault(); promptBox.classList.remove("drag"); loadFile(e.dataTransfer.files[0]); });
+
+function showError(msg) { $("formError").textContent = msg; $("formError").hidden = false; }
+
+$("submitBtn").addEventListener("click", async () => {
+  $("formError").hidden = true;
+  const text = $("docText").value.trim();
+  if (!text) return showError("Paste your document or upload a .txt file first.");
+  if (text.length > MAX_CHARS) return showError("Your document is longer than " + MAX_CHARS.toLocaleString() + " characters. Shorten it or split it into parts.");
+  $("submitBtn").disabled = true;
+  try {
+    const jobId = DEMO ? "demo-job" : await submitJob(text);
+    startWorking(jobId);
+  } catch (err) {
+    showError("Could not submit: " + err.message);
+    $("submitBtn").disabled = false;
+  }
+});
+
+// ----- Working screen: 3 steps + polling -----
+// Draw the 3 steps. "doneCount" = how many stages have finished (0 to 3).
+function renderSteps(doneCount) {
+  const ul = $("steps"); ul.replaceChildren();
+  STEPS.forEach((name, i) => {
+    const state = i < doneCount ? "done" : i === doneCount ? "active" : "";
+    const li = el("li", state);
+    li.appendChild(el("span", "dot", state === "done" ? "✓" : String(i + 1)));
+    li.appendChild(document.createTextNode(name));
+    ul.appendChild(li);
+  });
+}
+
+function startWorking(jobId) {
+  showScreen("working");
+  renderSteps(0);
+  let count = 0;
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    count++;
+    if (count > MAX_POLLS) return failBack("This is taking too long. Please try again later.");
+    try {
+      const job = DEMO ? demoStatus(count) : await getStatus(jobId);
+      // Real progress: the backend reports how many stages have finished (0 to 3).
+      renderSteps(job.completed_stages || 0);
+      if (job.status === "SUCCEEDED") { clearInterval(pollTimer); renderResult(adaptResult(job.result)); }
+      else if (job.status === "FAILED") failBack(job.error || "The analysis failed. Please try again.");
+    } catch (err) {
+      console.warn("poll failed:", err); // one failed check is not fatal; try again next tick
+    }
+  }, DEMO ? 1200 : POLL_EVERY_MS);
+}
+
+function failBack(msg) {
+  clearInterval(pollTimer);
+  showScreen("form"); $("submitBtn").disabled = false; showError(msg);
+}
+
+// ----- Flip tiles: each word flips over, one after another -----
+function flipText(text) {
+  const frag = document.createDocumentFragment();
+  const words = String(text).split(" ").filter(Boolean);
+  const start = Math.min(flipClock, 3500);
+  flipClock += words.length * 30;
+  words.forEach((w, i) => {
+    const s = el("span", "ft", w);
+    s.style.setProperty("--d", (start + i * 30) + "ms");
+    frag.appendChild(s); frag.appendChild(document.createTextNode(" "));
+  });
+  return frag;
+}
+
+// ----- Result -----
+function levelOf(c) { return c.risk && LEVEL_LABEL[c.risk.level] ? c.risk.level : "none"; }
+
+function clauseCard(c, i) {
+  const level = levelOf(c);
+  const card = el("div", "clause " + level);
+  const h = el("h3", "", (c.title || "Clause " + (i + 1)) + " ");
+  h.appendChild(el("span", "pill " + level, LEVEL_LABEL[level]));
+  card.appendChild(h);
+  if (level !== "none" && c.risk.reason) card.appendChild(el("div", "why", (c.risk.category ? c.risk.category + ": " : "") + c.risk.reason));
+  const p = el("p", "plain"); p.appendChild(flipText(c.plain || "")); card.appendChild(p);
+  if (c.original) {
+    const d = el("details"); d.appendChild(el("summary", "", "Show original wording")); d.appendChild(el("p", "", c.original));
+    card.appendChild(d);
+  }
+  return card;
+}
+
+function flagsBox(items) {
+  const box = el("div", "card flags"); box.appendChild(el("h2", "", "Red flags"));
+  const ul = el("ul", "list");
+  if (!items.length) ul.appendChild(el("li", "", "No red flags were found. Still read the full document yourself."));
+  items.forEach((t) => {
+    const li = el("li"); const bang = el("span", "bang", "!"); bang.setAttribute("aria-hidden", "true");
+    const txt = el("span"); txt.appendChild(flipText(t));
+    li.appendChild(bang); li.appendChild(txt); ul.appendChild(li);
+  });
+  box.appendChild(ul); return box;
+}
+
+function checkBox(items) {
+  if (!items.length) return null;
+  const box = el("div", "card checks"); box.appendChild(el("h2", "", "What to check before you sign"));
+  const ul = el("ul", "list");
+  items.forEach((t, i) => {
+    const li = el("li");
+    const cb = el("input"); cb.type = "checkbox"; cb.id = "chk" + i;
+    const lb = el("label"); lb.htmlFor = "chk" + i; lb.appendChild(flipText(t));
+    li.appendChild(cb); li.appendChild(lb); ul.appendChild(li);
+  });
+  box.appendChild(ul); return box;
+}
+
+function renderResult(result) {
+  flipClock = 0; // start the flip reveal from the beginning
+  const clauses = result.clauses || [];
+  // Use the backend's lists if given; otherwise build them from the clauses
+  let flags = Array.isArray(result.red_flags) ? result.red_flags : [];
+  if (!flags.length) flags = clauses.filter((c) => ["high", "medium"].includes(levelOf(c)) && c.risk.reason).map((c) => (c.title ? c.title + ": " : "") + c.risk.reason);
+  let checks = Array.isArray(result.to_evaluate) ? result.to_evaluate : [];
+  if (!checks.length) checks = clauses.filter((c) => c.risk && c.risk.check).map((c) => c.risk.check);
+  const counts = { high: 0, medium: 0, low: 0, none: 0 };
+  clauses.forEach((c) => counts[levelOf(c)]++);
+  const levels = ["high", "medium", "low", "none"].filter((k) => counts[k]);
+
+  const sec = $("resultSection"); sec.replaceChildren();
+
+  const top = el("div", "card"); top.appendChild(el("h2", "", "Your breakdown"));
+  const disc = el("div", "disclaimer"); disc.appendChild(flipText(result.disclaimer || "This is a plain-language explanation, not legal advice."));
+  top.appendChild(disc);
+  const meter = el("div", "meter"); meter.setAttribute("role", "img"); meter.setAttribute("aria-label", "Risk summary bar");
+  levels.forEach((k) => { const s = el("span", k); s.style.flex = counts[k]; meter.appendChild(s); });
+  top.appendChild(meter);
+  const legend = el("div", "legend");
+  levels.forEach((k) => legend.appendChild(el("span", "pill " + k, counts[k] + " " + LEVEL_LABEL[k].toLowerCase())));
+  top.appendChild(legend);
+  const again = el("button", "ghost", "Explain another document"); again.type = "button";
+  again.addEventListener("click", resetPage);
+  top.appendChild(again);
+  sec.appendChild(top);
+
+  sec.appendChild(flagsBox(flags));
+  const cb = checkBox(checks); if (cb) sec.appendChild(cb);
+  sec.appendChild(el("h2", "clause-title", "Clause by clause"));
+  clauses.forEach((c, i) => sec.appendChild(clauseCard(c, i)));
+
+  showScreen("done");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function resetPage() {
+  $("resultSection").replaceChildren();
+  $("docText").value = ""; autoGrow();
+  loadedText = ""; $("docFile").value = ""; setChip(null);
+  $("submitBtn").disabled = false;
+  showScreen("form");
+}
+
+showScreen("form");
+</script>
+</body>
+</html>

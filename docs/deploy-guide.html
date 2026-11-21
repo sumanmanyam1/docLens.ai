@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deploy Guide: Document-Explainer</title>
+<style>
+  :root { --bg:#fff; --ink:#111; --muted:#666; --line:#d4d4d4; --box:#f6f6f6; --code:#f1f1f1;
+          --ok:#eaf7ee; --ok-l:#2b8a3e; --warn:#fff8e1; --warn-l:#e0a800; --bad:#fdecea; --bad-l:#c92a2a; --blue:#eef3ff; --blue-l:#3b5bdb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f0f0f; --ink:#eee; --muted:#9a9a9a; --line:#333; --box:#1a1a1a; --code:#181818;
+            --ok:#122318; --ok-l:#5fc77a; --warn:#2a2308; --warn-l:#d9a520; --bad:#2a1412; --bad-l:#ff8a80; --blue:#14193a; --blue-l:#7c93f5; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 system-ui,"Segoe UI",Roboto,Arial,sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:32px 20px 80px; }
+  h1 { margin:0 0 4px; font-size:1.9rem; } .sub { color:var(--muted); margin:0 0 20px; }
+  h2 { font-size:1.2rem; margin:0; }
+  .step { border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:16px 0; background:var(--box); }
+  .step.done { opacity:.6; }
+  .head { display:flex; gap:12px; align-items:center; margin-bottom:8px; }
+  .num { flex:none; width:32px; height:32px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-weight:700; }
+  .head label { margin-left:auto; font-size:.85rem; color:var(--muted); cursor:pointer; white-space:nowrap; }
+  .cmd { position:relative; background:var(--code); border:1px solid var(--line); border-radius:8px; padding:12px 90px 12px 14px; margin:8px 0; overflow-x:auto; }
+  .cmd pre { margin:0; font:.88rem/1.55 ui-monospace,Menlo,Consolas,monospace; white-space:pre; }
+  .cmd button { position:absolute; top:8px; right:8px; font:600 .78rem system-ui; border:1px solid var(--line); background:var(--bg); color:var(--ink); border-radius:6px; padding:4px 10px; cursor:pointer; }
+  .cmd button:hover { background:var(--box); }
+  .expect, .stop, .tip, .info { border-left:4px solid; border-radius:6px; padding:8px 12px; margin:10px 0; font-size:.95rem; }
+  .expect { background:var(--ok); border-color:var(--ok-l); } .stop { background:var(--bad); border-color:var(--bad-l); }
+  .tip { background:var(--warn); border-color:var(--warn-l); } .info { background:var(--blue); border-color:var(--blue-l); }
+  .expect b:first-child, .stop b:first-child, .tip b:first-child, .info b:first-child { display:block; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; }
+  code { background:var(--code); border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:.9em; }
+  .tree { font:.88rem/1.5 ui-monospace,Menlo,Consolas,monospace; background:var(--code); border:1px solid var(--line); border-radius:8px; padding:12px 14px; white-space:pre; overflow-x:auto; }
+  .hl { background:var(--ok); color:var(--ok-l); font-weight:700; padding:1px 4px; border-radius:4px; }
+  .no { color:var(--bad-l); }
+  table { width:100%; border-collapse:collapse; margin:8px 0; } th,td { text-align:left; vertical-align:top; padding:6px 8px; border-bottom:1px solid var(--line); font-size:.92rem; }
+  th { background:var(--box); }
+  progress { width:100%; height:10px; margin:6px 0 4px; }
+  details { border:1px solid var(--line); border-radius:8px; padding:8px 14px; margin:8px 0; background:var(--box); } summary { cursor:pointer; font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Deploy Guide</h1>
+  <p class="sub">Follow the steps in order. Tick each box when done. Copy buttons put the command on your clipboard. Paste it into the terminal and press Enter.</p>
+  <progress id="bar" value="0" max="8"></progress>
+  <div class="sub" id="barText">0 of 8 steps done</div>
+
+  <div class="info"><b>Before you start</b>
+    This builds real resources in the company AWS account <code>&lt;ACCOUNT_ID&gt;</code>, region <code>us-east-1</code>, all named <code>suman-...</code>.
+    It costs pennies while it exists, plus a few cents per document. Step 8 removes everything.</div>
+
+  <!-- 1 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">1</span><h2>Open the terminal in the right folder</h2><label><input type="checkbox"> done</label></div>
+    <p>In VS Code's file panel, <b>right-click the <code>backend</code> folder</b> and choose <b>Open in Integrated Terminal</b>.</p>
+    <div class="tree">doc_exp_pip_lne/
+├── <span class="hl">backend/        &lt;-- right-click THIS one</span>
+│   ├── app.py          (CDK looks for these two files)
+│   ├── cdk.json
+│   ├── infra/
+│   ├── src/            <span class="no">(not this one, where the agents are)</span>
+│   └── tests/
+├── frontend/
+├── docs/
+└── test_docs/</div>
+    <div class="cmd"><pre>pwd</pre><button>Copy</button></div>
+    <div class="expect"><b>You should see</b>/home/suman-manyam/ai_projects/doc_exp_pip_lne/backend</div>
+    <div class="stop"><b>Stop if</b>the path ends with anything else (for example <code>/lambdas</code> or no <code>backend</code>). Run <code>cd /home/suman-manyam/ai_projects/doc_exp_pip_lne/backend</code>.</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">2</span><h2>Set up the terminal</h2><label><input type="checkbox"> done</label></div>
+    <p>Load your settings. <code>deploy.env</code> holds your account and profile, and it is never uploaded to GitHub. (First time? Copy <code>deploy.env.example</code> to <code>deploy.env</code> and fill it in.)</p>
+    <div class="cmd"><pre>source .venv/bin/activate
+source deploy.env</pre><button>Copy</button></div>
+    <div class="expect"><b>You should see</b>nothing printed, and <code>(.venv)</code> at the start of your prompt.</div>
+    <div class="tip"><b>Note</b>These settings last only for this terminal window. If you open a new terminal, paste them again.</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">3</span><h2>Check which account you are in</h2><label><input type="checkbox"> done</label></div>
+    <div class="cmd"><pre>aws sts get-caller-identity</pre><button>Copy</button></div>
+    <div class="expect"><b>You should see</b>"Account": the same 12-digit number as <code>APPROVED_ACCOUNT</code> in your <code>deploy.env</code></div>
+    <div class="stop"><b>Stop if</b>the account number is anything else. Do not continue.</div>
+    <details><summary>It says the session has expired</summary>
+      <p>Log in again, then repeat this step:</p>
+      <div class="cmd"><pre>aws sso login --profile &lt;your-aws-profile&gt;</pre><button>Copy</button></div></details>
+  </div>
+
+  <!-- 4 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">4</span><h2>Run the tests</h2><label><input type="checkbox"> done</label></div>
+    <p>Free, and nothing touches AWS. This proves the code still works before you deploy.</p>
+    <div class="cmd"><pre>pytest -q</pre><button>Copy</button></div>
+    <div class="expect"><b>You should see</b>61 passed</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">5</span><h2>Preview what will be created</h2><label><input type="checkbox"> done</label></div>
+    <p><code>cdk diff</code> only shows the plan. <b>It creates nothing.</b></p>
+    <div class="cmd"><pre>cdk diff</pre><button>Copy</button></div>
+    <div class="expect"><b>You should see</b>a list of new things, each marked <code>[+]</code>: 2 DynamoDB tables, 5 Lambda functions, 1 state machine, 1 HTTP API, and IAM roles. Everything is named <code>suman-...</code>.</div>
+    <div class="stop"><b>Stop if</b>you see <code>[-]</code> or <code>[~]</code> lines (things being deleted or changed), or any name that does not start with <code>suman-</code>.</div>
+    <details><summary>"cdk: command not found"</summary>
+      <p>Install it once, then run step 5 again:</p>
+      <div class="cmd"><pre>sudo npm install -g aws-cdk</pre><button>Copy</button></div></details>
+  </div>
+
+  <!-- 6 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">6</span><h2>Deploy (this creates the real resources)</h2><label><input type="checkbox"> done</label></div>
+    <div class="tip"><b>Last check</b>Step 3 showed account &lt;ACCOUNT_ID&gt;, and the plan in step 5 looked right. If both are true, go ahead.</div>
+    <div class="cmd"><pre>cdk deploy</pre><button>Copy</button></div>
+    <p>CDK first shows a table of permissions it will create, then asks:</p>
+    <div class="cmd"><pre>Do you wish to deploy these changes (y/n)?</pre></div>
+    <p>Read the table. It should list permissions for the Lambdas, the state machine, and Bedrock (one model only). Then type <b><code>y</code></b> and press Enter. It takes a few minutes.</p>
+    <div class="expect"><b>You should see at the end</b>"Deployment time: ..." and an output line like<br>
+      <code>suman-doc-explainer.ApiUrl = https://abc123.execute-api.us-east-1.amazonaws.com</code><br><b>Copy that URL.</b> You need it in step 7.</div>
+    <details><summary>It failed with an error</summary>
+      <p>Copy the last 15 lines of the error and send them to me. A half-finished deploy rolls back by itself, and you can run <code>cdk deploy</code> again.</p></details>
+  </div>
+
+  <!-- 7 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">7</span><h2>Connect your web page and test</h2><label><input type="checkbox"> done</label></div>
+    <ol>
+      <li>Open <code>frontend/index.html</code> in VS Code.</li>
+      <li>Find this line near the bottom (search for <code>API_URL</code>):
+        <div class="cmd"><pre>const API_URL = "";</pre></div></li>
+      <li>Paste your URL between the quotes. <b>No slash at the end.</b>
+        <div class="cmd"><pre>const API_URL = "https://abc123.execute-api.us-east-1.amazonaws.com";</pre></div></li>
+      <li>Save the file, then open it in your browser (double-click it, or right-click, Open with Live Server).</li>
+      <li>Attach a file from the <code>test_docs/input</code> folder, for example <code>sample_lease.txt</code>, and click the arrow button.</li>
+    </ol>
+    <div class="expect"><b>You should see</b>the 3 steps tick off one by one, then the breakdown with risk labels. It takes about 30 to 60 seconds.</div>
+    <table>
+      <tr><th>Test file</th><th>What a good result looks like</th></tr>
+      <tr><td><code>sample_lease.txt</code></td><td>Auto-renewal and early termination flagged high</td></tr>
+      <tr><td><code>sample_clean_agreement.txt</code></td><td>Nothing flagged high</td></tr>
+      <tr><td><code>sample_too_long.txt</code></td><td>The page refuses it before sending</td></tr>
+    </table>
+    <div class="tip"><b>Compare with the answers</b>Open the matching <code>test_docs/result/ans_...md</code> file only after the result is on screen. Never keep it open in the file you upload.</div>
+    <details><summary>The page says "Could not submit" or nothing happens</summary>
+      <p>Press F12 in the browser and open the Console tab. A red "CORS" or "Failed to fetch" message usually means the URL is wrong or has a slash at the end.</p></details>
+    <details><summary>The job shows FAILED</summary>
+      <p>Open the AWS console, region N. Virginia (us-east-1), then Step Functions, then <b>suman-doc-explainer-pipeline</b>, then the latest execution. The red box shows which stage failed. Click it, then open its Lambda log. Send me the error text.</p></details>
+  </div>
+
+  <!-- 8 -->
+  <div class="step" data-step>
+    <div class="head"><span class="num">8</span><h2>Delete everything when you are done</h2><label><input type="checkbox"> done</label></div>
+    <p>Run this after the demo and after you have your screenshots and audit log. Do it from the same <code>backend</code> terminal (repeat step 2 if you opened a new one).</p>
+    <div class="cmd"><pre>cdk destroy</pre><button>Copy</button></div>
+    <p>Type <b><code>y</code></b> when asked. All <code>suman-</code> resources are removed, and so is the data in the tables.</p>
+    <div class="tip"><b>Before you destroy</b>Save the audit log first: AWS console, DynamoDB, table <code>suman-audit-log</code>, Explore items. Take a screenshot.</div>
+  </div>
+
+  <h2 style="margin-top:32px">Quick help</h2>
+  <table>
+    <tr><th>Problem</th><th>Fix</th></tr>
+    <tr><td>"no cdk.json found" or "app.py not found"</td><td>You are in the wrong folder. Go back to step 1.</td></tr>
+    <tr><td>Session expired</td><td><code>aws sso login --profile &lt;your-aws-profile&gt;</code></td></tr>
+    <tr><td>Wrong account number in step 3</td><td>Stop. Redo step 2 in a fresh terminal.</td></tr>
+    <tr><td>Stage fails with "AccessDenied" for Bedrock</td><td>Send me the error. It is a small permission fix.</td></tr>
+    <tr><td>Page shows "Too long" for a short file</td><td>The 20,000-character limit counts everything in the file.</td></tr>
+  </table>
+</main>
+
+<script>
+  // Copy buttons
+  document.querySelectorAll(".cmd button").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const text = btn.parentElement.querySelector("pre").innerText;
+      try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
+      catch (e) { btn.textContent = "Select + Ctrl+C"; }
+      setTimeout(() => (btn.textContent = "Copy"), 1500);
+    });
+  });
+  // Progress: remember ticks in this browser
+  const boxes = [...document.querySelectorAll("[data-step] input[type=checkbox]")];
+  const bar = document.getElementById("bar"), txt = document.getElementById("barText");
+  function update() {
+    const n = boxes.filter((b) => b.checked).length;
+    bar.value = n; txt.textContent = n + " of " + boxes.length + " steps done";
+    boxes.forEach((b) => b.closest("[data-step]").classList.toggle("done", b.checked));
+    localStorage.setItem("deployGuide", JSON.stringify(boxes.map((b) => b.checked)));
+  }
+  try { (JSON.parse(localStorage.getItem("deployGuide")) || []).forEach((v, i) => boxes[i] && (boxes[i].checked = v)); } catch (e) {}
+  boxes.forEach((b) => b.addEventListener("change", update));
+  update();
+</script>
+</body>
+</html>

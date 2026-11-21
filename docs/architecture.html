@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document-Explainer: Architecture</title>
+<style>
+  :root { --bg:#fff; --ink:#111; --muted:#666; --line:#bbb; --box:#f6f6f6; --aws:#fff3e0; --aws-line:#e08a00;
+          --sf:#eef3ff; --sf-line:#3b5bdb; --db:#eaf7ee; --db-line:#2b8a3e; --ai:#f6eeff; --ai-line:#7048e8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f0f0f; --ink:#eee; --muted:#999; --line:#555; --box:#1b1b1b; --aws:#2a2010; --aws-line:#e0a030;
+            --sf:#14193a; --sf-line:#7c93f5; --db:#122318; --db-line:#5fc77a; --ai:#201734; --ai-line:#a58bf5; }
+  }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui,Segoe UI,Arial,sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:32px 20px 56px; }
+  h1 { font-size:1.7rem; margin:0 0 4px; } h2 { font-size:1.15rem; margin:32px 0 10px; }
+  p.sub { color:var(--muted); margin:0 0 20px; }
+  svg { width:100%; height:auto; border:1px solid var(--line); border-radius:8px; }
+  svg text { fill:var(--ink); font:13px system-ui,Segoe UI,Arial,sans-serif; }
+  svg .small { font-size:11px; fill:var(--muted); } svg .title { font-weight:600; }
+  .b { fill:var(--box); stroke:var(--line); stroke-width:1.5; }
+  .lam { fill:var(--aws); stroke:var(--aws-line); stroke-width:1.5; }
+  .sf { fill:var(--sf); stroke:var(--sf-line); stroke-width:1.5; }
+  .db { fill:var(--db); stroke:var(--db-line); stroke-width:1.5; }
+  .ai { fill:var(--ai); stroke:var(--ai-line); stroke-width:1.5; }
+  .arrow { stroke:var(--ink); stroke-width:1.5; fill:none; marker-end:url(#head); }
+  .dash { stroke:var(--muted); stroke-width:1.5; fill:none; stroke-dasharray:5 4; marker-end:url(#head); }
+  ol { padding-left:22px; } li { margin-bottom:6px; }
+  code { background:var(--box); border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:.92em; }
+  table { border-collapse:collapse; width:100%; } th,td { text-align:left; border-bottom:1px solid var(--line); padding:6px 8px; font-size:.95rem; }
+  .note { border-left:3px solid var(--ink); padding:4px 0 4px 14px; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Document-Explainer Pipeline</h1>
+  <p class="sub">Paste a lease or policy, get a plain-English, clause-by-clause breakdown with flagged risks. All AWS resources are named <code>suman-...</code>.</p>
+
+  <svg viewBox="0 0 1180 520" role="img" aria-label="Architecture diagram">
+    <defs>
+      <marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="color:var(--ink)"/>
+      </marker>
+    </defs>
+
+    <!-- Browser and API -->
+    <rect class="b" x="20" y="240" width="130" height="70" rx="8"/>
+    <text class="title" x="85" y="270" text-anchor="middle">Browser</text>
+    <text class="small" x="85" y="288" text-anchor="middle">frontend/index.html</text>
+
+    <rect class="lam" x="190" y="240" width="140" height="70" rx="8"/>
+    <text class="title" x="260" y="270" text-anchor="middle">API Gateway</text>
+    <text class="small" x="260" y="288" text-anchor="middle">suman-doc-explainer-api</text>
+
+    <path class="arrow" d="M150,275 L190,275"/>
+    <path class="arrow" d="M330,262 L390,110"/>
+    <path class="arrow" d="M330,288 L390,430"/>
+    <text class="small" x="268" y="215" text-anchor="middle">POST /jobs</text>
+    <text class="small" x="268" y="345" text-anchor="middle">GET /jobs/{job_id}</text>
+
+    <!-- API Lambdas and jobs table -->
+    <rect class="lam" x="390" y="70" width="160" height="60" rx="8"/>
+    <text class="title" x="470" y="97" text-anchor="middle">Lambda</text>
+    <text class="small" x="470" y="115" text-anchor="middle">suman-start-job</text>
+
+    <rect class="lam" x="390" y="410" width="160" height="60" rx="8"/>
+    <text class="title" x="470" y="437" text-anchor="middle">Lambda</text>
+    <text class="small" x="470" y="455" text-anchor="middle">suman-get-status</text>
+
+    <rect class="db" x="390" y="240" width="160" height="60" rx="8"/>
+    <text class="title" x="470" y="267" text-anchor="middle">DynamoDB</text>
+    <text class="small" x="470" y="285" text-anchor="middle">suman-jobs</text>
+
+    <path class="arrow" d="M470,130 L470,240"/>
+    <path class="arrow" d="M470,410 L470,300"/>
+
+    <!-- Step Functions -->
+    <rect class="sf" x="620" y="40" width="320" height="370" rx="10"/>
+    <text class="title" x="780" y="64" text-anchor="middle">Step Functions</text>
+    <text class="small" x="780" y="80" text-anchor="middle">suman-doc-explainer-pipeline (Retry x3, Catch)</text>
+
+    <rect class="lam" x="650" y="100" width="260" height="46" rx="6"/>
+    <text x="780" y="128" text-anchor="middle">1. suman-clause-extractor</text>
+    <rect class="lam" x="650" y="170" width="260" height="46" rx="6"/>
+    <text x="780" y="198" text-anchor="middle">2. suman-risk-flagger</text>
+    <rect class="lam" x="650" y="240" width="260" height="46" rx="6"/>
+    <text x="780" y="268" text-anchor="middle">3. suman-plain-english-rewriter</text>
+    <rect class="sf" x="650" y="320" width="260" height="46" rx="6" style="stroke-dasharray:4 3"/>
+    <text x="780" y="348" text-anchor="middle">Save result (or Save failure)</text>
+
+    <path class="arrow" d="M780,146 L780,170"/>
+    <path class="arrow" d="M780,216 L780,240"/>
+    <path class="arrow" d="M780,286 L780,320"/>
+    <path class="arrow" d="M550,100 L620,100"/>
+    <text class="small" x="585" y="92" text-anchor="middle">start</text>
+    <path class="dash" d="M650,343 L550,285"/>
+
+    <!-- Bedrock -->
+    <rect class="ai" x="1010" y="150" width="150" height="90" rx="8"/>
+    <text class="title" x="1085" y="188" text-anchor="middle">Amazon Bedrock</text>
+    <text class="small" x="1085" y="206" text-anchor="middle">Claude Sonnet 4.6</text>
+    <text class="small" x="1085" y="222" text-anchor="middle">converse()</text>
+    <path class="arrow" d="M910,123 L1010,175"/>
+    <path class="arrow" d="M910,193 L1010,195"/>
+    <path class="arrow" d="M910,263 L1010,215"/>
+
+    <!-- Audit log -->
+    <rect class="db" x="620" y="440" width="320" height="56" rx="8"/>
+    <text class="title" x="780" y="465" text-anchor="middle">DynamoDB: suman-audit-log</text>
+    <text class="small" x="780" y="483" text-anchor="middle">one row per stage per job</text>
+    <path class="dash" d="M780,410 L780,440"/>
+    <path class="dash" d="M550,445 L620,462"/>
+    <text class="small" x="585" y="438" text-anchor="middle">count rows</text>
+  </svg>
+
+  <h2>How a request flows</h2>
+  <ol>
+    <li>The page sends the document to <code>POST /jobs</code>. <code>suman-start-job</code> checks it (not empty, at most 20,000 characters), saves a <code>RUNNING</code> job, starts the state machine, and returns a <code>job_id</code>.</li>
+    <li>Step Functions runs the three stage Lambdas in order. Each one asks Claude through Bedrock, checks the JSON answer, and writes an audit row.</li>
+    <li>If a stage fails, it retries up to 3 times. If it still fails, the job is saved as <code>FAILED</code>.</li>
+    <li>After stage 3, <code>Save result</code> stores <code>SUCCEEDED</code> and the finished result in the jobs table.</li>
+    <li>Meanwhile the page asks <code>GET /jobs/{job_id}</code> every 3 seconds. <code>suman-get-status</code> returns the status, how many stages have finished (counted from the audit log), and the result when done.</li>
+  </ol>
+
+  <h2>The three stages</h2>
+  <table>
+    <tr><th>Stage</th><th>Does</th><th>Adds to each clause</th></tr>
+    <tr><td>1. clause-extractor</td><td>Splits the document into numbered clauses, wording copied exactly</td><td><code>clause_id</code>, <code>original_text</code></td></tr>
+    <tr><td>2. risk-flagger</td><td>Rates each clause low, medium or high</td><td><code>risk_level</code>, <code>category</code>, <code>reason</code></td></tr>
+    <tr><td>3. plain-english-rewriter</td><td>Explains each clause simply and adds the disclaimer</td><td><code>plain_english</code></td></tr>
+  </table>
+
+  <h2>Safety built in</h2>
+  <ul>
+    <li>Prompts use only the document's text and say "unclear" instead of guessing.</li>
+    <li>Each stage checks the AI's answer. Stage 1 confirms every clause really appears in the document.</li>
+    <li>The AI can't change the original wording, the risk labels, or the disclaimer. Our code adds them.</li>
+    <li>The "not legal advice" disclaimer is added by code to every result.</li>
+    <li>Bedrock permission is limited to one model. The API is throttled to limit cost. Demo only, with no login: use fake documents.</li>
+  </ul>
+
+  <p class="note">Status: deployed with <code>cdk deploy</code> (stack <code>suman-doc-explainer</code>) and tested (76 local tests, real runs on the deployed stack). The web page is served by a private S3 bucket behind CloudFront. Code layout: <code>backend/src/agents</code>, <code>api</code>, <code>shared</code>.</p>
+</main>
+</body>
+</html>
