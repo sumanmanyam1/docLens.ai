@@ -32,9 +32,8 @@ flowchart LR
     STATUS -->|count rows = progress| AUDIT
 ```
 
-A larger diagram and a full code walkthrough are in:
+More detail:
 - `docs/architecture.html` (open in a browser)
-- `docs/code-walkthrough.html` (every file explained, likely questions, 2-minute demo script)
 - `docs/audit-log-sample.json` (the audit log from one real run: all three agents)
 
 ### How a request flows
@@ -117,7 +116,6 @@ pytest -q
 ## Deploy
 
 **Needs:** Python 3.12+, Node.js, the AWS CLI, and an AWS login with access to Claude Sonnet 4.6 in Bedrock (`us-east-1`).
-A step-by-step visual version is in `docs/deploy-guide.html`.
 
 1. **Install the CDK tool** (once):
    ```bash

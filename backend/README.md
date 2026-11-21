@@ -26,4 +26,4 @@ source deploy.env && python app.py   # builds the template only; nothing is depl
 ```
 
 ## Deploy
-See `../README.md` (Deploy section) or `../docs/deploy-guide.html`.
+See `../README.md` (Deploy section).

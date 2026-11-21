@@ -65,9 +65,7 @@ doc_exp_pip_lne/
 ├── docs/
 │   ├── decisions/                      project brief, risks, ADRs
 │   ├── architecture.html
-│   ├── audit-log-sample.json           audit log from one real run
-│   ├── code-walkthrough.html
-│   └── deploy-guide.html
+│   └── audit-log-sample.json           audit log from one real run
 ├── frontend/
 │   ├── index.html                      the web page
 │   └── .gitkeep
