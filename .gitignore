@@ -3,7 +3,6 @@ backend/deploy.env
 .env
 *.env
 !*.env.example
-.compass/
 .aws/
 start Building*.txt
 

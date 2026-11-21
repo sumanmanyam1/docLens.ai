@@ -1,0 +1,39 @@
+{
+  "current_phase": "ship",
+  "phases": {
+    "define": {
+      "status": "complete",
+      "started_at": "2026-11-20T05:13:23Z",
+      "sections": {
+        "vision": "complete",
+        "compliance": "complete",
+        "stakeholders": "complete",
+        "nfrs": "complete",
+        "risks": "complete",
+        "backlog": "complete"
+      },
+      "completed_at": "2026-11-20T07:25:01.919407Z"
+    },
+    "decide": {
+      "status": "complete",
+      "completed_at": "2026-11-20T09:40:47.740570+00:00"
+    },
+    "build": {
+      "status": "complete",
+      "scaffold_generated": true,
+      "scaffold_archetype": "aws-cdk-python-serverless"
+    },
+    "ship": {
+      "status": "in_progress"
+    }
+  },
+  "decisions_completed": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D8"
+  ]
+}

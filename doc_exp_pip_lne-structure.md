@@ -76,7 +76,7 @@ doc_exp_pip_lne/
 ├── mini-project-05-document-explainer.md
 ├── README.md
 ├── .gitignore
-└── .compass/                           (local) project notes
+└── .compass/                           Compass project notes (state, decisions)
     ├── config.yml
     ├── context.json
     └── state.json
