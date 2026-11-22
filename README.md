@@ -100,7 +100,8 @@ The folders follow the parts of an AI agent: **agents** (the brains and their pr
 ├── test_docs/
 │   ├── input/                   fake documents to upload
 │   └── result/                  ans_ answer keys (never upload these)
-└── docs/                        diagrams, code walkthrough, deploy guide, decision records
+├── scripts/                     deploy.sh, update.sh, destroy.sh
+└── docs/                        diagrams, decision records, audit log sample
 ```
 
 Each agent works the same way: **read its prompt → ask the AI → check the answer → write to memory → pass it on.**
@@ -155,6 +156,14 @@ pytest -q
    ```
    Then run `cdk deploy` again to upload the updated page. (With `API_URL` empty, the page runs in demo mode with sample data.)
 8. **Test.** Open the `FrontendUrl`, attach `test_docs/input/sample_lease.txt`, and compare the result with `test_docs/result/ans_sample_lease.md`.
+
+### Or use the scripts
+Three scripts in `scripts/` do the checks and commands for you (see `scripts/README.md`):
+```bash
+./scripts/deploy.sh     # first time only
+./scripts/update.sh     # after you change code or the page
+./scripts/destroy.sh    # when you are done
+```
 
 ### Remove everything
 ```bash
