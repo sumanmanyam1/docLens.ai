@@ -85,12 +85,15 @@
       "async submit + poll with real progress",
       "result on page",
       "S3 + CloudFront website",
-      "secrets redaction",
-      "demo notice"
+      "secrets redaction"
     ],
     "dropped_by_choice": [
       "SES email",
       "S3 presigned upload for large files"
+    ],
+    "removed_by_owner": [
+      "demo-only notice on page",
+      "red flags box on result screen"
     ]
   },
   "decisions": {
@@ -183,11 +186,9 @@
       "FrontendUrl"
     ],
     "gate": "before any deploy: source deploy.env, sts get-caller-identity must equal APPROVED_ACCOUNT, owner confirms",
-    "live_version": "first layout (before restructure); real lease runs SUCCEEDED",
+    "live_version": "restructured layout + secrets guardrail (deployed 2026-11-22)",
     "pending_redeploy": [
-      "restructure (Lambda code + handler paths)",
-      "secrets guardrail",
-      "demo notice"
+      "frontend: demo notice and red flags box removed"
     ]
   },
   "repo": {

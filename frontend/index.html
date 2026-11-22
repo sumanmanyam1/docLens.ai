@@ -30,7 +30,6 @@
   .hero-inner { max-width:760px; margin:0 auto; }
   .hero h1 { font-size:clamp(1.8rem,4.5vw,2.4rem); line-height:1.15; letter-spacing:-.02em; }
   .hero p { color:var(--muted); font-size:1.05rem; max-width:52ch; margin:12px 0 0; }
-  .hero .demo-note { font-size:.9rem; max-width:none; background:var(--med-bg); color:var(--med); border-radius:8px; padding:8px 12px; }
 
   /* ---- Layout ---- */
   main { max-width:760px; margin:0 auto; padding:24px 20px 56px; }
@@ -121,10 +120,9 @@
   .low { --c:var(--low); --cb:var(--low-bg); } .none { --c:var(--ok); --cb:var(--ok-bg); }
   .pill { background:var(--cb); color:var(--c); border-radius:99px; padding:2px 10px; font-size:.82rem; font-weight:600; white-space:nowrap; }
   .meter .high { background:var(--high); } .meter .medium { background:#c9a227; } .meter .low { background:#a8a8a8; } .meter .none { background:#d4d4d4; }
-  .flags h2,.checks h2 { font-size:1.15rem; margin-bottom:14px; }
+  .checks h2 { font-size:1.15rem; margin-bottom:14px; }
   .list { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
   .list li { display:flex; gap:12px; align-items:flex-start; }
-  .bang { flex:none; width:22px; height:22px; border-radius:50%; border:1.5px solid var(--high); color:var(--high); font-weight:700; display:grid; place-items:center; font-size:.8rem; margin-top:2px; }
   .list input[type=checkbox] { flex:none; width:20px; height:20px; margin-top:3px; accent-color:var(--ink); }
   .list label { font-weight:400; margin:0; cursor:pointer; }
   .list input:checked + label { text-decoration:line-through; color:var(--muted); }
@@ -153,8 +151,6 @@
     <div>
       <h1>DocLens</h1>
     </div>
-    <!-- Demo notice (spec section 6): this page has no login and is for testing only -->
-    <p class="demo-note" role="note"><strong>Demo only.</strong> Do not upload real or personal documents. Results are a plain-language explanation, not legal advice.</p>
   </div>
 </header>
 
@@ -400,18 +396,6 @@ function clauseCard(c, i) {
   return card;
 }
 
-function flagsBox(items) {
-  const box = el("div", "card flags"); box.appendChild(el("h2", "", "Red flags"));
-  const ul = el("ul", "list");
-  if (!items.length) ul.appendChild(el("li", "", "No red flags were found. Still read the full document yourself."));
-  items.forEach((t) => {
-    const li = el("li"); const bang = el("span", "bang", "!"); bang.setAttribute("aria-hidden", "true");
-    const txt = el("span"); txt.appendChild(flipText(t));
-    li.appendChild(bang); li.appendChild(txt); ul.appendChild(li);
-  });
-  box.appendChild(ul); return box;
-}
-
 function checkBox(items) {
   if (!items.length) return null;
   const box = el("div", "card checks"); box.appendChild(el("h2", "", "What to check before you sign"));
@@ -428,9 +412,7 @@ function checkBox(items) {
 function renderResult(result) {
   flipClock = 0; // start the flip reveal from the beginning
   const clauses = result.clauses || [];
-  // Use the backend's lists if given; otherwise build them from the clauses
-  let flags = Array.isArray(result.red_flags) ? result.red_flags : [];
-  if (!flags.length) flags = clauses.filter((c) => ["high", "medium"].includes(levelOf(c)) && c.risk.reason).map((c) => (c.title ? c.title + ": " : "") + c.risk.reason);
+  // Use the backend's checklist if given; otherwise build it from the clauses
   let checks = Array.isArray(result.to_evaluate) ? result.to_evaluate : [];
   if (!checks.length) checks = clauses.filter((c) => c.risk && c.risk.check).map((c) => c.risk.check);
   const counts = { high: 0, medium: 0, low: 0, none: 0 };
@@ -453,7 +435,6 @@ function renderResult(result) {
   top.appendChild(again);
   sec.appendChild(top);
 
-  sec.appendChild(flagsBox(flags));
   const cb = checkBox(checks); if (cb) sec.appendChild(cb);
   sec.appendChild(el("h2", "clause-title", "Clause by clause"));
   clauses.forEach((c, i) => sec.appendChild(clauseCard(c, i)));
