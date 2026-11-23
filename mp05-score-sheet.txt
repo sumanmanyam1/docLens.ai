@@ -1,0 +1,108 @@
+Score Sheet — MP05: Document-Explainer Pipeline
+================================================================================
+Pass: >= 70/100 baseline AND reliability gate = Y · Shape: async pipeline (hardest)
+Model: us.anthropic.claude-sonnet-4-6 / us-east-1 · grade UI polish leniently
+
+Student: SUMAN          Repo: ____________________
+Grader: SRINI           Date: 23/11/26
+Demo: [✓] live   [ ] rec   [ ] fresh cdk deploy
+
+
+GATES — do first (any N => cannot pass, bonus forfeited)
+--------------------------------------------------------------------------------
+Gate                                                                    Pass?
+Reliability: >= 3 of 4 Day-4 patterns present AND working               Y / N
+Forced-failure demo: a Step Functions stage Catch fires OR              Y / N
+  max-iter escalates
+
+
+PART A — Baseline (100)
+--------------------------------------------------------------------------------
+#  Criterion              Check (full = all ticked)                        Score
+--------------------------------------------------------------------------------
+1  Agent loop             each stage a real bounded loop · 3 specialists    __/15
+                          clause -> risk -> rewrite · each stops right
+
+2  Tools                  read_document, extract_clauses, flag_risks ·      __/15
+                          clear desc · precise schema · errors as strings
+
+3  Reliability (gated)    max-iter per stage · Retry/Catch (failed stage    __/25
+                          escalates) · input (len cap) · output (no
+                          secrets) · audit log to DDB by job id
+
+4  Project guardrail      "not legal advice" disclaimer present · no        __/10
+                          fabrication (clauses match source) (shown)
+
+5  CDK deploy             cdk deploy fresh incl. state machine ·            __/20
+                          3 specialists + status Lambda · Bedrock via
+                          IAM · no API key
+
+6  Thin UI (lenient)      submit -> SFn -> page polls status -> renders ·   __/10
+                          email sent
+
+7  README + submission    diagram · setup · deploy steps · demo · audit     __/5
+                          log all 3 stages · GitHub
+--------------------------------------------------------------------------------
+
+Patterns working (crit 3): ___/4
+BASELINE SUBTOTAL: ___/100 (pass >= 70 AND gate = Y)
+
+Bands: full / 70% / <=40%.
+Crit 3: all 4 demoed = 25 · 3 of 4 = 17 · <=2 = gate fails.
+
+
+PART B — Stretch (cap +15, baseline must pass first)
+--------------------------------------------------------------------------------
+Stretch                                                 For #05         Earned
+--------------------------------------------------------------------------------
+Step Functions pipeline (Retry/Catch,                   natural (core)    __/8
+  1 Lambda/specialist, own prompts)
+Async status poller (status Lambda reads job state;     natural (core)    __/3
+  page polls)
+S3 static hosting of index.html                         natural           __/2
+S3 presigned upload + event (large docs)                partial           __/4
+EventBridge scheduled run                               not applicable    __/3
+--------------------------------------------------------------------------------
+
+STRETCH (capped +15): ___/15
+FINAL: ___/115
+Pass: Y / N
+
+
+Notes / follow-ups
+--------------------------------------------------------------------------------
+
+
+
+
+Oral check (tick covered)
+--------------------------------------------------------------------------------
+Loop:
+  [ ] each specialist's distinct prompt
+  [ ] state passing between stages
+  [ ] why pipeline not single agent
+
+Tools:
+  [ ] read_document schema
+  [ ] paste vs S3 path
+
+Reliability:
+  [ ] force a stage to fail -> Catch fires
+  [ ] audit log across 3 stages
+  [ ] length-cap
+
+Guardrail:
+  [ ] where's the "not legal advice" disclaimer
+  [ ] prove a flagged clause exists in source
+
+AWS:
+  [ ] Bedrock auth/no key in 4 Lambdas
+  [ ] fresh deploy incl state machine
+  [ ] how poller reads status
+
+Understanding:
+  [ ] hardest/faked part
+  [ ] breaks under load
+
+--------------------------------------------------------------------------------
+Infinitra Studio · Week 6 · MP05

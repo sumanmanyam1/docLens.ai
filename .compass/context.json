@@ -187,8 +187,10 @@
       "FrontendUrl"
     ],
     "gate": "before any deploy: source deploy.env, sts get-caller-identity must equal APPROVED_ACCOUNT, owner confirms",
-    "live_version": "restructure + secrets guardrail + UI changes + demo switch (deployed 2026-11-23)",
-    "pending_redeploy": []
+    "live_version": "DESTROYED",
+    "pending_redeploy": [],
+    "destroyed_at": "2026-11-23T14:16:18.730865+00:00",
+    "note_after_destroy": "redeploy with ./scripts/deploy.sh; ApiUrl and FrontendUrl will change; frontend/index.html API_URL must be updated"
   },
   "repo": {
     "host": "GitHub (private recommended)",
@@ -210,9 +212,9 @@
       "code on GitHub"
     ],
     "todo": [
-      "run the Catch demo once",
-      "screenshot of rendered breakdown",
-      "cdk destroy after demo"
+      "redeploy before a live demo (./scripts/deploy.sh)",
+      "run the Catch demo",
+      "screenshot of rendered breakdown"
     ],
     "not_met": [
       "bounded agent loop per stage",
