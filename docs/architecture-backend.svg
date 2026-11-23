@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 940" width="1600" height="940" font-family="Segoe UI, Roboto, Arial, sans-serif">
+<title>DocLens backend architecture</title>
+<defs>
+<marker id="e-1c7ed6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1c7ed6"/></marker><marker id="s-1c7ed6" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#1c7ed6"/></marker>
+<marker id="e-2b8a3e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b8a3e"/></marker><marker id="s-2b8a3e" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#2b8a3e"/></marker>
+<marker id="e-2f9e44" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2f9e44"/></marker><marker id="s-2f9e44" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#2f9e44"/></marker>
+<marker id="e-4263eb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4263eb"/></marker><marker id="s-4263eb" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#4263eb"/></marker>
+<marker id="e-7048e8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7048e8"/></marker><marker id="s-7048e8" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#7048e8"/></marker>
+<marker id="e-e03131" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e03131"/></marker><marker id="s-e03131" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#e03131"/></marker>
+<marker id="e-e8590c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e8590c"/></marker><marker id="s-e8590c" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#e8590c"/></marker>
+</defs>
+<rect width="1600" height="940" fill="#ffffff"/>
+<text x="30" y="38" font-size="22" font-weight="700" fill="#111" text-anchor="start">DocLens backend: how one request flows</text>
+<text x="30" y="60" font-size="13" font-weight="400" fill="#555" text-anchor="start">All resources are created by one `cdk deploy` (AWS CDK, Python) in us-east-1. Every name starts with suman-.</text>
+<rect x="30" y="390" width="160" height="90" rx="10" fill="#e7f5ff" stroke="#1c7ed6" stroke-width="2"/>
+<text x="110.0" y="414" text-anchor="middle" font-size="15" font-weight="700" fill="#111">Browser</text>
+<text x="42" y="434" font-size="12.5" fill="#222">frontend/index.html</text>
+<text x="42" y="451" font-size="12.5" fill="#222">paste or attach .txt</text>
+<rect x="240" y="90" width="200" height="80" rx="10" fill="#e7f5ff" stroke="#1c7ed6" stroke-width="2"/>
+<text x="340.0" y="114" text-anchor="middle" font-size="15" font-weight="700" fill="#111">CloudFront</text>
+<text x="252" y="134" font-size="12.5" fill="#222">https web address</text>
+<text x="252" y="151" font-size="12.5" fill="#222">only it can read S3</text>
+<rect x="490" y="90" width="280" height="80" rx="10" fill="#e7f5ff" stroke="#1c7ed6" stroke-width="2"/>
+<text x="630.0" y="114" text-anchor="middle" font-size="15" font-weight="700" fill="#111">S3 bucket (private)</text>
+<text x="630.0" y="131" text-anchor="middle" font-size="12" fill="#1c7ed6" font-family="monospace">suman-doc-explainer-frontend-…</text>
+<text x="502" y="151" font-size="12.5" fill="#222">index.html, uploaded on deploy</text>
+<rect x="240" y="360" width="200" height="150" rx="10" fill="#fff4e6" stroke="#e8590c" stroke-width="2"/>
+<text x="340.0" y="384" text-anchor="middle" font-size="15" font-weight="700" fill="#111">API Gateway</text>
+<text x="340.0" y="401" text-anchor="middle" font-size="12" fill="#e8590c" font-family="monospace">suman-doc-explainer-api</text>
+<text x="252" y="421" font-size="12.5" fill="#222">POST /jobs</text>
+<text x="252" y="438" font-size="12.5" fill="#222">GET /jobs/{job_id}</text>
+<text x="252" y="455" font-size="12.5" fill="#222">CORS on</text>
+<text x="252" y="472" font-size="12.5" fill="#222">throttled: 2 req/s</text>
+<rect x="490" y="240" width="280" height="140" rx="10" fill="#fff9db" stroke="#e67700" stroke-width="2"/>
+<text x="630.0" y="264" text-anchor="middle" font-size="15" font-weight="700" fill="#111">Lambda: start job</text>
+<text x="630.0" y="281" text-anchor="middle" font-size="12" fill="#e67700" font-family="monospace">suman-start-job</text>
+<text x="502" y="301" font-size="12.5" fill="#222">• text not empty, ≤ 20,000 chars</text>
+<text x="502" y="318" font-size="12.5" fill="#222">  (else HTTP 400)</text>
+<text x="502" y="335" font-size="12.5" fill="#222">• save job as RUNNING</text>
+<text x="502" y="352" font-size="12.5" fill="#222">• start the pipeline</text>
+<text x="502" y="369" font-size="12.5" fill="#222">• return 202 + job_id</text>
+<rect x="490" y="500" width="280" height="125" rx="10" fill="#fff9db" stroke="#e67700" stroke-width="2"/>
+<text x="630.0" y="524" text-anchor="middle" font-size="15" font-weight="700" fill="#111">Lambda: get status</text>
+<text x="630.0" y="541" text-anchor="middle" font-size="12" fill="#e67700" font-family="monospace">suman-get-status</text>
+<text x="502" y="561" font-size="12.5" fill="#222">• read the job&#x27;s status + result</text>
+<text x="502" y="578" font-size="12.5" fill="#222">• count audit rows = progress 0-3</text>
+<text x="502" y="595" font-size="12.5" fill="#222">• return status, completed_stages,</text>
+<text x="502" y="612" font-size="12.5" fill="#222">  result or error</text>
+<path d="M490,772 a140.0,12 0 0,0 280,0 a140.0,12 0 0,0 -280,0 v96 a140.0,12 0 0,0 280,0 v-96" fill="#ebfbee" stroke="#2f9e44" stroke-width="2"/>
+<text x="630.0" y="800" text-anchor="middle" font-size="15" font-weight="700" fill="#111">DynamoDB: jobs</text>
+<text x="630.0" y="817" text-anchor="middle" font-size="12" fill="#2f9e44" font-family="monospace">suman-jobs</text>
+<text x="630.0" y="836" text-anchor="middle" font-size="12" fill="#222">one row per job:</text>
+<text x="630.0" y="852" text-anchor="middle" font-size="12" fill="#222">status, result_json, error</text>
+<rect x="810" y="150" width="540" height="560" rx="14" fill="#edf2ff" stroke="#4263eb" stroke-width="2.5"/>
+<text x="1080" y="176" font-size="16" font-weight="700" fill="#111" text-anchor="middle">Step Functions (the orchestrator)</text>
+<text x="1080" y="194" font-size="12" font-weight="400" fill="#4263eb" text-anchor="middle">suman-doc-explainer-pipeline · max 10 min per run</text>
+<rect x="840" y="215" width="320" height="100" rx="10" fill="#ffffff" stroke="#4263eb" stroke-width="2"/>
+<text x="1000.0" y="239" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Agent 1: extract clauses</text>
+<text x="1000.0" y="256" text-anchor="middle" font-size="12" fill="#4263eb" font-family="monospace">suman-clause-extractor</text>
+<text x="852" y="276" font-size="12.5" fill="#222">prompt.md → ask Claude → check answer</text>
+<text x="852" y="293" font-size="12.5" fill="#222">split into clauses; each must match the source</text>
+<text x="852" y="310" font-size="12.5" fill="#222">↻ Retry ×3 (wait 2 s, 4 s, 8 s)</text>
+<rect x="840" y="340" width="320" height="100" rx="10" fill="#ffffff" stroke="#4263eb" stroke-width="2"/>
+<text x="1000.0" y="364" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Agent 2: flag risks</text>
+<text x="1000.0" y="381" text-anchor="middle" font-size="12" fill="#4263eb" font-family="monospace">suman-risk-flagger</text>
+<text x="852" y="401" font-size="12.5" fill="#222">prompt.md → ask Claude → check answer</text>
+<text x="852" y="418" font-size="12.5" fill="#222">low / medium / high + category + reason</text>
+<text x="852" y="435" font-size="12.5" fill="#222">↻ Retry ×3 (wait 2 s, 4 s, 8 s)</text>
+<rect x="840" y="465" width="320" height="100" rx="10" fill="#ffffff" stroke="#4263eb" stroke-width="2"/>
+<text x="1000.0" y="489" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Agent 3: plain English</text>
+<text x="1000.0" y="506" text-anchor="middle" font-size="12" fill="#4263eb" font-family="monospace">suman-plain-english-rewriter</text>
+<text x="852" y="526" font-size="12.5" fill="#222">prompt.md → ask Claude → check answer</text>
+<text x="852" y="543" font-size="12.5" fill="#222">explain; hide secrets; add disclaimer</text>
+<text x="852" y="560" font-size="12.5" fill="#222">↻ Retry ×3 (wait 2 s, 4 s, 8 s)</text>
+<path d="M1000,315 L1000,340" fill="none" stroke="#4263eb" stroke-width="2" marker-end="url(#e-4263eb)"/>
+<text x="1008" y="332" font-size="11" font-weight="400" fill="#4263eb" text-anchor="start">output → next input</text>
+<path d="M1000,440 L1000,465" fill="none" stroke="#4263eb" stroke-width="2" marker-end="url(#e-4263eb)"/>
+<text x="1008" y="457" font-size="11" font-weight="400" fill="#4263eb" text-anchor="start">output → next input</text>
+<rect x="840" y="600" width="320" height="60" rx="10" fill="#d3f9d8" stroke="#2b8a3e" stroke-width="2"/>
+<text x="1000.0" y="624" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Save result</text>
+<text x="852" y="644" font-size="12.5" fill="#222">status = SUCCEEDED + result</text>
+<path d="M1000,565 L1000,600" fill="none" stroke="#4263eb" stroke-width="2" marker-end="url(#e-4263eb)"/>
+<rect x="1190" y="600" width="140" height="60" rx="10" fill="#ffe3e3" stroke="#e03131" stroke-width="2"/>
+<text x="1260.0" y="624" text-anchor="middle" font-size="14" font-weight="700" fill="#111">Save failure</text>
+<text x="1202" y="644" font-size="12.5" fill="#222">status = FAILED</text>
+<path d="M1160,297 L1260,297" fill="none" stroke="#e03131" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M1160,422 L1260,422" fill="none" stroke="#e03131" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M1160,547 L1260,547" fill="none" stroke="#e03131" stroke-width="2" stroke-dasharray="7 5"/>
+<path d="M1260,297 L1260,600" fill="none" stroke="#e03131" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#e-e03131)"/>
+<text x="1268" y="425" font-size="12" font-weight="700" fill="#e03131" text-anchor="start">Catch:</text>
+<text x="1268" y="440" font-size="11" font-weight="400" fill="#e03131" text-anchor="start">still failing</text>
+<text x="1268" y="454" font-size="11" font-weight="400" fill="#e03131" text-anchor="start">after 3 retries</text>
+<text x="1268" y="468" font-size="11" font-weight="400" fill="#e03131" text-anchor="start">→ Save failure</text>
+<text x="1268" y="482" font-size="11" font-weight="400" fill="#e03131" text-anchor="start">→ Job failed</text>
+<rect x="1400" y="215" width="175" height="350" rx="10" fill="#f3f0ff" stroke="#7048e8" stroke-width="2"/>
+<text x="1487.5" y="239" text-anchor="middle" font-size="15" font-weight="700" fill="#111">Amazon Bedrock</text>
+<text x="1412" y="259" font-size="12.5" fill="#222">Claude Sonnet 4.6</text>
+<text x="1412" y="276" font-size="12.5" fill="#222"></text>
+<text x="1412" y="293" font-size="12.5" fill="#222">converse()</text>
+<text x="1412" y="310" font-size="12.5" fill="#222">temperature 0</text>
+<text x="1412" y="327" font-size="12.5" fill="#222"></text>
+<text x="1412" y="344" font-size="12.5" fill="#222">IAM: only the 3</text>
+<text x="1412" y="361" font-size="12.5" fill="#222">agents, only this</text>
+<text x="1412" y="378" font-size="12.5" fill="#222">model, no API key</text>
+<path d="M1160,255 L1400,255" fill="none" stroke="#7048e8" stroke-width="2" marker-end="url(#e-7048e8)" marker-start="url(#s-7048e8)"/>
+<path d="M1160,380 L1400,380" fill="none" stroke="#7048e8" stroke-width="2" marker-end="url(#e-7048e8)" marker-start="url(#s-7048e8)"/>
+<path d="M1160,505 L1400,505" fill="none" stroke="#7048e8" stroke-width="2" marker-end="url(#e-7048e8)" marker-start="url(#s-7048e8)"/>
+<path d="M870,772 a130.0,12 0 0,0 260,0 a130.0,12 0 0,0 -260,0 v96 a130.0,12 0 0,0 260,0 v-96" fill="#ebfbee" stroke="#2f9e44" stroke-width="2"/>
+<text x="1000.0" y="800" text-anchor="middle" font-size="15" font-weight="700" fill="#111">DynamoDB: audit log</text>
+<text x="1000.0" y="817" text-anchor="middle" font-size="12" fill="#2f9e44" font-family="monospace">suman-audit-log</text>
+<text x="1000.0" y="836" text-anchor="middle" font-size="12" fill="#222">one row per agent per job</text>
+<text x="1000.0" y="852" text-anchor="middle" font-size="12" fill="#222">key: job_id + stage</text>
+<path d="M110,390 L110,130 L240,130" fill="none" stroke="#1c7ed6" stroke-width="2" marker-end="url(#e-1c7ed6)"/>
+<circle cx="110" cy="260" r="12" fill="#111"/><text x="110" y="264.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text>
+<text x="118" y="250" font-size="11" font-weight="400" fill="#1c7ed6" text-anchor="start">load page</text>
+<path d="M440,130 L490,130" fill="none" stroke="#1c7ed6" stroke-width="2" marker-end="url(#e-1c7ed6)"/>
+<path d="M190,410 L240,410" fill="none" stroke="#e8590c" stroke-width="2" marker-end="url(#e-e8590c)"/>
+<circle cx="215" cy="392" r="12" fill="#111"/><text x="215" y="396.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text>
+<text x="196" y="430" font-size="11" font-weight="400" fill="#e8590c" text-anchor="start">POST</text>
+<text x="196" y="459" font-size="11" font-weight="400" fill="#e8590c" text-anchor="start">reply</text>
+<path d="M240,465 L190,465" fill="none" stroke="#e8590c" stroke-width="2" marker-end="url(#e-e8590c)"/>
+<path d="M190,480 L240,480" fill="none" stroke="#e8590c" stroke-width="2" marker-end="url(#e-e8590c)"/>
+<circle cx="215" cy="500" r="12" fill="#111"/><text x="215" y="504.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">8</text>
+<text x="158" y="525" font-size="11" font-weight="400" fill="#e8590c" text-anchor="start">GET every 3 s</text>
+<path d="M440,400 L462,400 L462,310 L490,310" fill="none" stroke="#e8590c" stroke-width="2" marker-end="url(#e-e8590c)"/>
+<path d="M440,470 L462,470 L462,560 L490,560" fill="none" stroke="#e8590c" stroke-width="2" marker-end="url(#e-e8590c)"/>
+<path d="M500,380 L500,400 L476,400 L476,800 L490,800" fill="none" stroke="#2f9e44" stroke-width="2" marker-end="url(#e-2f9e44)"/>
+<text x="400" y="745" font-size="11" font-weight="400" fill="#2f9e44" text-anchor="start">save RUNNING</text>
+<path d="M770,300 L810,300" fill="none" stroke="#4263eb" stroke-width="2" marker-end="url(#e-4263eb)"/>
+<circle cx="790" cy="282" r="12" fill="#111"/><text x="790" y="286.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text>
+<text x="774" y="322" font-size="11" font-weight="400" fill="#4263eb" text-anchor="start">start</text>
+<circle cx="1290" cy="243" r="12" fill="#111"/><text x="1290" y="247.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">4</text>
+<path d="M1000,710 L1000,760" fill="none" stroke="#2f9e44" stroke-width="2" marker-end="url(#e-2f9e44)"/>
+<circle cx="1022" cy="735" r="12" fill="#111"/><text x="1022" y="739.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">5</text>
+<text x="1040" y="740" font-size="11" font-weight="400" fill="#2f9e44" text-anchor="start">each agent writes 1 row</text>
+<path d="M840,630 L825,630 L825,735 L720,735 L720,760" fill="none" stroke="#2b8a3e" stroke-width="2" marker-end="url(#e-2b8a3e)"/>
+<path d="M1260,660 L1260,725 L825,725" fill="none" stroke="#e03131" stroke-width="2" stroke-dasharray="7 5"/>
+<circle cx="1260" cy="692" r="12" fill="#111"/><text x="1260" y="696.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">6</text>
+<text x="1276" y="697" font-size="11" font-weight="700" fill="#e03131" text-anchor="start">FAILED</text>
+<circle cx="825" cy="690" r="12" fill="#111"/><text x="825" y="694.5" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">7</text>
+<text x="712" y="752" font-size="11" font-weight="400" fill="#333" text-anchor="end">status + result</text>
+<path d="M630,625 L630,760" fill="none" stroke="#2f9e44" stroke-width="2" marker-end="url(#e-2f9e44)"/>
+<text x="638" y="700" font-size="11" font-weight="400" fill="#2f9e44" text-anchor="start">read</text>
+<path d="M770,600 L790,600 L790,905 L1000,905 L1000,880" fill="none" stroke="#2f9e44" stroke-width="2" marker-end="url(#e-2f9e44)"/>
+<text x="800" y="900" font-size="11" font-weight="400" fill="#2f9e44" text-anchor="start">count rows = progress</text>
+<text x="30" y="560" font-size="14" font-weight="700" fill="#111" text-anchor="start">Steps</text>
+<text x="30" y="582" font-size="12" font-weight="400" fill="#333" text-anchor="start">1  Browser loads the page</text>
+<text x="30" y="601" font-size="12" font-weight="400" fill="#333" text-anchor="start">2  POST /jobs with the text</text>
+<text x="30" y="620" font-size="12" font-weight="400" fill="#333" text-anchor="start">3  start-job starts the pipeline</text>
+<text x="30" y="639" font-size="12" font-weight="400" fill="#333" text-anchor="start">4  each agent asks Claude</text>
+<text x="30" y="658" font-size="12" font-weight="400" fill="#333" text-anchor="start">5  each agent writes an audit row</text>
+<text x="30" y="677" font-size="12" font-weight="400" fill="#333" text-anchor="start">6  still failing → Catch → FAILED</text>
+<text x="30" y="696" font-size="12" font-weight="400" fill="#333" text-anchor="start">7  done → Save result → SUCCEEDED</text>
+<text x="30" y="715" font-size="12" font-weight="400" fill="#333" text-anchor="start">8  page polls GET every 3 s</text>
+<rect x="30" y="739" width="14" height="14" rx="3" fill="#e7f5ff" stroke="#1c7ed6" stroke-width="2"/>
+<text x="52" y="750" font-size="12" font-weight="400" fill="#333" text-anchor="start">web</text>
+<rect x="30" y="758" width="14" height="14" rx="3" fill="#fff4e6" stroke="#e8590c" stroke-width="2"/>
+<text x="52" y="769" font-size="12" font-weight="400" fill="#333" text-anchor="start">API</text>
+<rect x="30" y="777" width="14" height="14" rx="3" fill="#fff9db" stroke="#e67700" stroke-width="2"/>
+<text x="52" y="788" font-size="12" font-weight="400" fill="#333" text-anchor="start">Lambda</text>
+<rect x="30" y="796" width="14" height="14" rx="3" fill="#edf2ff" stroke="#4263eb" stroke-width="2"/>
+<text x="52" y="807" font-size="12" font-weight="400" fill="#333" text-anchor="start">Step Functions</text>
+<rect x="30" y="815" width="14" height="14" rx="3" fill="#ebfbee" stroke="#2f9e44" stroke-width="2"/>
+<text x="52" y="826" font-size="12" font-weight="400" fill="#333" text-anchor="start">DynamoDB</text>
+<rect x="30" y="834" width="14" height="14" rx="3" fill="#f3f0ff" stroke="#7048e8" stroke-width="2"/>
+<text x="52" y="845" font-size="12" font-weight="400" fill="#333" text-anchor="start">AI</text>
+<rect x="30" y="853" width="14" height="14" rx="3" fill="#ffe3e3" stroke="#e03131" stroke-width="2"/>
+<text x="52" y="864" font-size="12" font-weight="400" fill="#333" text-anchor="start">failure path</text>
+</svg>

@@ -12,6 +12,7 @@ Before saving, any secrets (passwords, keys) are replaced with [REDACTED].
 import json
 from pathlib import Path
 
+from shared.fault_injection import maybe_fail
 from shared.memory import write_audit
 from shared.llm import call_model
 from shared.config import DISCLAIMER
@@ -51,6 +52,7 @@ def validate_rewrites(reply, clauses):
 def handler(event, context):
     job_id = event["job_id"]
     clauses = event["clauses"]
+    maybe_fail("plain_english_rewriter", event.get("text", ""))  # demo switch: fail on purpose if asked
 
     reply = call_model(SYSTEM_PROMPT, json.dumps({"clauses": clauses}))   # 1. ask the AI
     rewrites = validate_rewrites(reply, clauses)                          # 2. check its answer

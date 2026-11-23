@@ -161,13 +161,14 @@
       "code-fence stripping",
       "secret redaction",
       "disclaimer from code"
-    ]
+    ],
+    "demo_switch": "shared/fault_injection.py; DEMO_FAULTS=on for the 3 agents (infra/settings.py); marker [[DEMO-FAIL:<agent>]]"
   },
   "layout": {
     "lambda_code": "backend/src/{agents,api,shared}",
     "agent_prompts": "backend/src/agents/<agent>/prompt.md",
     "infra": "backend/infra/{stack,settings,storage,agents,orchestrator,api,website}.py",
-    "tests": "backend/tests/{agents,api,shared,infra} (76 tests)",
+    "tests": "backend/tests/{agents,api,shared,infra} (82 tests)",
     "frontend": "frontend/index.html",
     "test_docs": "test_docs/{input,result}",
     "docs": "docs/{decisions,architecture.html,audit-log-sample.json}",
@@ -186,10 +187,8 @@
       "FrontendUrl"
     ],
     "gate": "before any deploy: source deploy.env, sts get-caller-identity must equal APPROVED_ACCOUNT, owner confirms",
-    "live_version": "restructured layout + secrets guardrail (deployed 2026-11-22)",
-    "pending_redeploy": [
-      "frontend: demo notice and red flags box removed"
-    ]
+    "live_version": "restructure + secrets guardrail + UI changes + demo switch (deployed 2026-11-23)",
+    "pending_redeploy": []
   },
   "repo": {
     "host": "GitHub (private recommended)",
@@ -211,9 +210,15 @@
       "code on GitHub"
     ],
     "todo": [
-      "redeploy pending changes",
+      "run the Catch demo once",
       "screenshot of rendered breakdown",
       "cdk destroy after demo"
+    ],
+    "not_met": [
+      "bounded agent loop per stage",
+      "Bedrock tools with schemas",
+      "max-iterations escalation demo",
+      "EventBridge scheduled run (stretch)"
     ]
   }
 }

@@ -126,3 +126,11 @@ def test_every_agent_has_a_prompt_file():
     agents_dir = Path(__file__).parents[2] / "src" / "agents"
     for agent in ("clause_extractor", "risk_flagger", "plain_english_rewriter"):
         assert (agents_dir / agent / "prompt.md").read_text().strip()
+
+
+def test_demo_switch_is_on_for_the_3_agents_only(template):
+    env = {f["Properties"]["FunctionName"]: f["Properties"]["Environment"]["Variables"] for f in our_lambdas(template)}
+    for agent in ("suman-clause-extractor", "suman-risk-flagger", "suman-plain-english-rewriter"):
+        assert env[agent]["DEMO_FAULTS"] == "on"
+    for api_fn in ("suman-start-job", "suman-get-status"):
+        assert "DEMO_FAULTS" not in env[api_fn]

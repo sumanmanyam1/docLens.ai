@@ -1,0 +1,11 @@
+SHORT RENTAL AGREEMENT (FAKE SAMPLE FOR THE CATCH DEMO ONLY)
+
+1. Term. This agreement runs for six (6) months from March 1.
+
+2. Rent. Tenant pays $900 per month, due on the first day of each month.
+
+3. Automatic Renewal. Unless Tenant gives written notice sixty (60) days before the end of the term, this agreement renews for another six (6) months.
+
+4. Late Fee. Rent paid after the 5th day of the month incurs a late fee of $50.
+
+[[DEMO-FAIL:risk_flagger]]

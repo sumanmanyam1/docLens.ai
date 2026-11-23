@@ -9,7 +9,7 @@ import aws_cdk as cdk
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as lambda_
 
-from infra.settings import MODEL_ID, PREFIX, SRC_DIR
+from infra.settings import DEMO_FAULTS, MODEL_ID, PREFIX, SRC_DIR
 
 
 def _make_lambda(stack, group, folder, timeout_seconds, tables):
@@ -57,6 +57,7 @@ def create_lambdas(stack, tables):
     for fn in (fns.extractor, fns.flagger, fns.rewriter):
         fn.add_to_role_policy(bedrock_policy)
         audit_table.grant_write_data(fn)          # each agent writes an audit row
+        fn.add_environment("DEMO_FAULTS", DEMO_FAULTS)   # demo switch (agents only)
 
     # start_job creates job rows; get_status reads jobs and counts audit rows.
     jobs_table.grant_read_write_data(fns.start)

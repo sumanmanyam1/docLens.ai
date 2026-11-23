@@ -9,30 +9,21 @@ plain English, next to the original wording.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    U[Browser] -->|HTTPS| CF[CloudFront]
-    CF --> S3[(S3 bucket<br/>index.html)]
-    U -->|POST /jobs| API[API Gateway<br/>HTTP API]
-    U -->|GET /jobs/job_id<br/>every 3 s| API
-    API --> START[Lambda<br/>start-job]
-    API --> STATUS[Lambda<br/>get-status]
-    START -->|save RUNNING| JOBS[(DynamoDB<br/>jobs)]
-    START -->|start| SF
+![DocLens backend architecture: how one request flows](docs/architecture-backend.svg)
 
-    subgraph SF[Step Functions: Retry x3 + Catch on every stage]
-        direction TB
-        S1[1. clause-extractor] --> S2[2. risk-flagger] --> S3L[3. plain-english-rewriter] --> SAVE[Save result]
-    end
-
-    S1 & S2 & S3L -->|converse| BR[Amazon Bedrock<br/>Claude Sonnet 4.6]
-    S1 & S2 & S3L -->|one row per stage| AUDIT[(DynamoDB<br/>audit-log)]
-    SAVE -->|SUCCEEDED + result| JOBS
-    STATUS --> JOBS
-    STATUS -->|count rows = progress| AUDIT
-```
+| Step | What happens | AWS resource |
+|---|---|---|
+| **1** | The browser loads the web page over https. CloudFront is the only thing allowed to read the private bucket. | CloudFront → S3 `suman-doc-explainer-frontend-…` |
+| **2** | The page sends the document: `POST /jobs` with `{"text": "..."}`. | API Gateway `suman-doc-explainer-api` |
+| **3** | `start-job` checks the text (not empty, at most 20,000 characters, else HTTP 400), saves the job as `RUNNING`, starts the pipeline, and answers `202` with a `job_id`. | Lambda `suman-start-job`, DynamoDB `suman-jobs`, Step Functions |
+| **4** | Step Functions runs the three agents in order; each one's output is the next one's input. Each agent reads its `prompt.md`, asks Claude, and checks the answer in code. | Lambdas `suman-clause-extractor` → `suman-risk-flagger` → `suman-plain-english-rewriter`, Amazon Bedrock (Claude Sonnet 4.6) |
+| **5** | Each agent writes one row to the audit log (key: `job_id` + stage). | DynamoDB `suman-audit-log` |
+| **6** | If an agent fails, it is retried 3 times (wait 2 s, 4 s, 8 s). If it still fails, **Catch** goes to "Save failure": the job becomes `FAILED`. | Step Functions `suman-doc-explainer-pipeline` |
+| **7** | After agent 3, "Save result" stores `SUCCEEDED` and the result. | DynamoDB `suman-jobs` |
+| **8** | Every 3 seconds the page asks `GET /jobs/{job_id}`. `get-status` returns the status, the progress (number of audit rows, 0 to 3) and, when done, the result. | Lambda `suman-get-status` |
 
 More detail:
+- `docs/architecture-backend.svg` (the diagram above, full size)
 - `docs/architecture.html` (open in a browser)
 - `docs/audit-log-sample.json` (the audit log from one real run: all three agents)
 

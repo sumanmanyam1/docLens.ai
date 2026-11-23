@@ -9,6 +9,7 @@ stage 1, so the AI can never change the original wording.
 import json
 from pathlib import Path
 
+from shared.fault_injection import maybe_fail
 from shared.memory import write_audit
 from shared.llm import call_model
 
@@ -53,6 +54,7 @@ def validate_flags(reply, clauses):
 def handler(event, context):
     job_id = event["job_id"]
     clauses = event["clauses"]
+    maybe_fail("risk_flagger", event.get("text", ""))  # demo switch: fail on purpose if asked
 
     reply = call_model(SYSTEM_PROMPT, json.dumps({"clauses": clauses}))   # 1. ask the AI
     flags = validate_flags(reply, clauses)                                # 2. check its answer

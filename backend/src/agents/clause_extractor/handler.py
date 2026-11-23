@@ -8,6 +8,7 @@ Steps: ask the AI -> check its answer -> write an audit row -> pass it on.
 """
 from pathlib import Path
 
+from shared.fault_injection import maybe_fail
 from shared.memory import write_audit
 from shared.llm import call_model
 
@@ -46,6 +47,7 @@ def handler(event, context):
     # AWS calls this function. "event" is the input from Step Functions.
     job_id = event["job_id"]
     text = event["text"]
+    maybe_fail("clause_extractor", event.get("text", ""))  # demo switch: fail on purpose if asked
 
     reply = call_model(SYSTEM_PROMPT, text)         # 1. ask the AI
     clauses = validate_clauses(reply, text)         # 2. check its answer
